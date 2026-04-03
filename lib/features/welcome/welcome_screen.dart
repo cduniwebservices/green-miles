@@ -110,12 +110,60 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                           ],
                         ),
                       ),
-                      child: const Center(
-                        child: Icon(
-                          Icons.directions_run,
-                          size: 80,
-                          color: GlobalTheme.primaryNeon,
-                        ),
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          // Runner (top)
+                          Positioned(
+                            top: 20,
+                            child: Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: GlobalTheme.primaryNeon.withOpacity(0.1),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.directions_run,
+                                size: 60,
+                                color: GlobalTheme.primaryNeon,
+                              ),
+                            ),
+                          ),
+                          // Walker (bottom left)
+                          Positioned(
+                            left: 30,
+                            bottom: 30,
+                            child: Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: GlobalTheme.primaryNeon.withOpacity(0.1),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.directions_walk,
+                                size: 60,
+                                color: GlobalTheme.primaryNeon,
+                              ),
+                            ),
+                          ),
+                          // Cyclist (bottom right)
+                          Positioned(
+                            right: 30,
+                            bottom: 30,
+                            child: Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: GlobalTheme.primaryNeon.withOpacity(0.1),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.pedal_bike,
+                                size: 60,
+                                color: GlobalTheme.primaryNeon,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -141,7 +189,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'TRACK YOUR',
+                        'CALORIES NOT',
                         style: Theme.of(context).textTheme.displayLarge?.copyWith(
                           fontWeight: FontWeight.w900,
                           height: 1.0,
@@ -149,7 +197,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         ),
                       ),
                       Text(
-                        'FITNESS',
+                        'CARBON',
                         style: Theme.of(context).textTheme.displayLarge?.copyWith(
                           fontWeight: FontWeight.w900,
                           height: 1.0,

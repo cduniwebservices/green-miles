@@ -69,6 +69,7 @@ class _GoalSwiperState extends ConsumerState<GoalSwiper>
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: GoalCard(
                     goal: goal,
+                    index: index,
                     isActive: isActive,
                     onTap: () {
                       ref.read(goalProvider.notifier).selectGoal(goal);
@@ -87,12 +88,14 @@ class _GoalSwiperState extends ConsumerState<GoalSwiper>
 
 class GoalCard extends StatefulWidget {
   final Goal goal;
+  final int index;
   final bool isActive;
   final VoidCallback? onTap;
 
   const GoalCard({
     super.key,
     required this.goal,
+    required this.index,
     this.isActive = false,
     this.onTap,
   });
@@ -132,7 +135,7 @@ class _GoalCardState extends State<GoalCard>
 
   @override
   Widget build(BuildContext context) {
-    final isNeonCard = widget.goal.type == GoalType.tenK && widget.isActive;
+    final isNeonCard = widget.isActive;
 
     return AnimatedBuilder(
       animation: _controller,
@@ -158,7 +161,7 @@ class _GoalCardState extends State<GoalCard>
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  '1/4',
+                  '${widget.index + 1}/5',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: isNeonCard
                         ? Colors.black
@@ -170,6 +173,22 @@ class _GoalCardState extends State<GoalCard>
 
               const Spacer(),
 
+              // Transport icon
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: GlobalTheme.primaryNeon.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  widget.goal.icon,
+                  size: 50,
+                  color: GlobalTheme.primaryNeon,
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
               // Goal title
               Text(
                 widget.goal.title,
@@ -179,30 +198,20 @@ class _GoalCardState extends State<GoalCard>
                 ),
               ),
 
-              const SizedBox(height: 8),
-
-              // Goal description
-              Text(
-                widget.goal.description,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: isNeonCard
-                      ? Colors.black.withOpacity(0.7)
-                      : GlobalTheme.textSecondary,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-
               const SizedBox(height: 16),
 
               // Goal details
               Row(
                 children: [
-                  _buildDetailChip('Level', widget.goal.levelText, isNeonCard),
+                  _buildDetailChip(
+                    'Carbon Offset Potential',
+                    widget.goal.carbonOffsetPotential,
+                    isNeonCard,
+                  ),
                   const SizedBox(width: 8),
                   _buildDetailChip(
-                    'Duration',
-                    widget.goal.durationText,
+                    'CO₂/km',
+                    '${(widget.goal.co2PerKm * 1000).toInt()}g',
                     isNeonCard,
                   ),
                 ],

@@ -17,6 +17,7 @@ class GoalsScreen extends ConsumerStatefulWidget {
 class _GoalsScreenState extends ConsumerState<GoalsScreen>
     with TickerProviderStateMixin {
   late AnimationController _controller;
+  bool _isDescriptionVisible = false;
 
   @override
   void initState() {
@@ -34,6 +35,14 @@ class _GoalsScreenState extends ConsumerState<GoalsScreen>
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  void _toggleDescription() {
+    if (ref.read(goalProvider).selectedGoal != null) {
+      setState(() {
+        _isDescriptionVisible = !_isDescriptionVisible;
+      });
+    }
   }
 
   @override
@@ -88,14 +97,14 @@ class _GoalsScreenState extends ConsumerState<GoalsScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Choose Your',
+                        'Choose your regular',
                         style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                           color: GlobalTheme.textSecondary,
                           fontWeight: FontWeight.w400,
                         ),
                       ),
                       Text(
-                        'FITNESS GOAL',
+                        'METHOD OF TRANSPORT',
                         style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                           color: GlobalTheme.textPrimary,
                           fontWeight: FontWeight.w900,
@@ -128,49 +137,66 @@ class _GoalsScreenState extends ConsumerState<GoalsScreen>
                 ),
 
                 // Description
-                if (goalState.selectedGoal != null)
-                  TweenAnimationBuilder<double>(
-                    duration: const Duration(milliseconds: 600),
-                    tween: Tween<double>(begin: 0.0, end: 1.0),
-                    curve: Curves.easeOut,
-                    builder: (context, value, child) {
-                      return Opacity(
-                        opacity: value.clamp(0.0, 1.0),
-                        child: Transform.translate(
-                          offset: Offset(0, 20 * (1 - value)),
-                          child: child,
-                        ),
-                      );
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: GlobalTheme.surfaceCard,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: GlobalTheme.cardShadow,
+                TweenAnimationBuilder<double>(
+                  duration: const Duration(milliseconds: 600),
+                  tween: Tween<double>(begin: 0.0, end: 1.0),
+                  curve: Curves.easeOut,
+                  builder: (context, value, child) {
+                    return Opacity(
+                      opacity: value.clamp(0.0, 1.0),
+                      child: Transform.translate(
+                        offset: Offset(0, 20 * (1 - value)),
+                        child: child,
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            goalState.selectedGoal!.title,
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              color: GlobalTheme.primaryNeon,
-                              fontWeight: FontWeight.bold,
-                            ),
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: GlobalTheme.surfaceCard,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: GlobalTheme.cardShadow,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        GestureDetector(
+                          onTap: _toggleDescription,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  goalState.goals[goalState.currentIndex].title,
+                                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    color: GlobalTheme.primaryNeon,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              Icon(
+                                _isDescriptionVisible
+                                    ? Icons.keyboard_arrow_up
+                                    : Icons.keyboard_arrow_down,
+                                color: GlobalTheme.primaryNeon,
+                              ),
+                            ],
                           ),
+                        ),
+                        if (_isDescriptionVisible) ...[
                           const SizedBox(height: 8),
                           Text(
-                            goalState.selectedGoal!.description,
+                            goalState.goals[goalState.currentIndex].description,
                             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: GlobalTheme.textSecondary,
                               height: 1.5,
                             ),
                           ),
                         ],
-                      ),
+                      ],
                     ),
                   ),
+                ),
 
                 const SizedBox(height: 24),
 
@@ -189,11 +215,9 @@ class _GoalsScreenState extends ConsumerState<GoalsScreen>
                     );
                   },
                   child: AppButton.primary(
-                    text: 'START WORKOUT',
+                    text: 'COMMENCE JOURNEY',
                     width: double.infinity,
-                    onPressed: goalState.selectedGoal != null
-                        ? () => context.go('/run')
-                        : null,
+                    onPressed: () => context.go('/run'),
                   ),
                 ),
 

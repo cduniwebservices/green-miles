@@ -38,16 +38,11 @@ class _EnhancedRunScreenState extends ConsumerState<EnhancedRunScreen>
   }
 
   Future<void> _checkAutoStartParameter() async {
-    final uri = Uri.base;
-    final autoStart = uri.queryParameters['autoStart'] == 'true';
-
-    if (autoStart && _isInitialized) {
-      // Auto-start the activity after a brief delay
-      await Future.delayed(const Duration(milliseconds: 800));
-      if (mounted) {
-        final actions = ref.read(activityActionsProvider);
-        await _handleStartActivity(actions);
-      }
+    // Auto-start immediately when screen loads
+    await Future.delayed(const Duration(milliseconds: 800));
+    if (mounted) {
+      final actions = ref.read(activityActionsProvider);
+      await _handleStartActivity(actions);
     }
   }
 

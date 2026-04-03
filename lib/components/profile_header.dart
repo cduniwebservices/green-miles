@@ -25,14 +25,14 @@ class ProfileHeader extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Fitness User',
+                'Anonymous User',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: GlobalTheme.textPrimary,
                   fontWeight: FontWeight.w600,
                 ),
               ),
               Text(
-                'Ready to run!',
+                'Burn to earn!',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: GlobalTheme.textSecondary,
                 ),

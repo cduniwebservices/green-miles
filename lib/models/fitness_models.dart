@@ -363,8 +363,8 @@ class ActivityWaypoint {
   }
 }
 
-/// Goal types for fitness objectives
-enum GoalType { tenK, hiitRunning, marathon, weightLoss, strengthBuilding }
+/// Goal types for fitness goals
+enum GoalType { petrolDieselCar, electricVehicle, motorcycle, train, boat }
 
 /// Goal difficulty levels
 enum GoalLevel { easy, hard, extreme }
@@ -377,6 +377,9 @@ class Goal {
   final String description;
   final GoalLevel level;
   final Duration duration;
+  final String carbonOffsetPotential; // "Low", "Medium", "High"
+  final double co2PerKm;
+  final IconData icon;
   final String? image;
   final bool isSelected;
 
@@ -387,6 +390,9 @@ class Goal {
     required this.description,
     required this.level,
     required this.duration,
+    required this.carbonOffsetPotential,
+    required this.co2PerKm,
+    required this.icon,
     this.image,
     this.isSelected = false,
   });
@@ -398,6 +404,9 @@ class Goal {
     String? description,
     GoalLevel? level,
     Duration? duration,
+    String? carbonOffsetPotential,
+    double? co2PerKm,
+    IconData? icon,
     String? image,
     bool? isSelected,
   }) {
@@ -408,6 +417,9 @@ class Goal {
       description: description ?? this.description,
       level: level ?? this.level,
       duration: duration ?? this.duration,
+      carbonOffsetPotential: carbonOffsetPotential ?? this.carbonOffsetPotential,
+      co2PerKm: co2PerKm ?? this.co2PerKm,
+      icon: icon ?? this.icon,
       image: image ?? this.image,
       isSelected: isSelected ?? this.isSelected,
     );
@@ -439,48 +451,63 @@ class Goal {
 /// Sample goals for the app
 final List<Goal> sampleGoals = [
   Goal(
-    id: 'cardio_endurance',
-    type: GoalType.tenK,
-    title: 'Build Cardio Endurance',
+    id: 'petrol_diesel_car',
+    type: GoalType.petrolDieselCar,
+    title: 'Petrol/Diesel Car',
     description:
-        'Improve your cardiovascular fitness and run longer distances without getting tired.',
+        'Track your carbon footprint from driving a conventional petrol or diesel car.',
     level: GoalLevel.easy,
     duration: const Duration(minutes: 30),
+    carbonOffsetPotential: 'High',
+    co2PerKm: 0.171,
+    icon: Icons.directions_car,
   ),
   Goal(
-    id: 'strength_building',
-    type: GoalType.strengthBuilding,
-    title: 'Build Strength',
+    id: 'electric_vehicle',
+    type: GoalType.electricVehicle,
+    title: 'Electric Vehicle',
     description:
-        'Increase muscle mass and overall body strength through targeted workouts.',
+        'Compare the environmental impact of driving an electric vehicle versus conventional cars.',
     level: GoalLevel.hard,
     duration: const Duration(minutes: 45),
+    carbonOffsetPotential: 'Medium',
+    co2PerKm: 0.051,
+    icon: Icons.ev_station,
   ),
   Goal(
-    id: 'weight_loss',
-    type: GoalType.weightLoss,
-    title: 'Lose Weight',
+    id: 'motorcycle',
+    type: GoalType.motorcycle,
+    title: 'Motorcycle',
     description:
-        'Burn calories and lose excess weight through effective cardio and strength training.',
+        'Track the emissions and environmental impact of riding a motorcycle.',
     level: GoalLevel.easy,
     duration: const Duration(minutes: 40),
+    carbonOffsetPotential: 'Medium',
+    co2PerKm: 0.103,
+    icon: Icons.motorcycle,
   ),
   Goal(
-    id: 'marathon_training',
-    type: GoalType.marathon,
-    title: 'Marathon Training',
+    id: 'train',
+    type: GoalType.train,
+    title: 'Train',
     description:
-        'Train for a full marathon with progressive distance building and endurance work.',
+        'See how your train commute compares to other methods of transportation.',
     level: GoalLevel.extreme,
     duration: const Duration(hours: 2),
+    carbonOffsetPotential: 'Low',
+    co2PerKm: 0.041,
+    icon: Icons.train,
   ),
   Goal(
-    id: 'hiit_fitness',
-    type: GoalType.hiitRunning,
-    title: 'HIIT Fitness',
+    id: 'boat',
+    type: GoalType.boat,
+    title: 'Boat',
     description:
-        'High-intensity interval training for maximum calorie burn and fitness improvement.',
+        'Track the carbon emissions from boat travel and water transportation.',
     level: GoalLevel.hard,
     duration: const Duration(minutes: 25),
+    carbonOffsetPotential: 'High',
+    co2PerKm: 0.267,
+    icon: Icons.directions_boat,
   ),
 ];
