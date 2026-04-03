@@ -360,7 +360,7 @@ class _SessionSummaryScreenState extends ConsumerState<SessionSummaryScreen>
                   TileLayer(
                     urlTemplate:
                         'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                    userAgentPackageName: 'com.example.fitness_mobile',
+                    userAgentPackageName: 'com.example.calories_not_carbon',
                   ),
                   PolylineLayer(
                     polylines: [

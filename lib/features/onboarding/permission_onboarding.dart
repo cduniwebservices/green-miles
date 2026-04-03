@@ -1,4 +1,4 @@
-import 'package:fitness_mobile/theme/app_theme.dart';
+import 'package:calories_not_carbon/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../services/permission_service.dart';
