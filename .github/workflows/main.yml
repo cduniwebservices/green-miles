@@ -11,32 +11,40 @@ jobs:
     name: Build Android APK
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4 # Updated
+      - name: Checkout Repository
+        uses: actions/checkout@v4 # Stable v4/v5 compatible with Node 24
+
       - name: Set up Java
-        uses: actions/setup-java@v4 # Updated
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
           cache: 'gradle'
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.22.2'
           channel: 'stable'
-          cache: true
-      - name: Cache dependencies
-        uses: actions/cache@v4 # Updated
+          cache: true # Uses internal actions/cache@v5 logic in 2026 versions
+
+      - name: Cache pub dependencies
+        uses: actions/cache@v4
         with:
           path: ~/.pub-cache
           key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+
       - name: Install dependencies
         run: flutter pub get
+
       - name: Run tests
         run: flutter test
+
       - name: Build APK
         run: flutter build apk --release
+
       - name: Upload APK
-        uses: actions/upload-artifact@v4 # Updated
+        uses: actions/upload-artifact@v4 # v4+ resolves the Node deprecation
         with:
           name: android-apk
           path: build/app/outputs/flutter-apk/app-release.apk
@@ -46,24 +54,24 @@ jobs:
     runs-on: macos-latest
     needs: build-android
     steps:
-      - uses: actions/checkout@v4 # Updated
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.22.2'
           channel: 'stable'
           cache: true
-      - name: Cache dependencies
-        uses: actions/cache@v4 # Updated
-        with:
-          path: ~/.pub-cache
-          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+
       - name: Install dependencies
         run: flutter pub get
+
       - name: Build iOS
         run: flutter build ios --release --no-codesign
+
       - name: Upload IPA
-        uses: actions/upload-artifact@v4 # Updated
+        uses: actions/upload-artifact@v4
         with:
           name: ios-ipa
           path: build/ios/iphoneos/
