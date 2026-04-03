@@ -38,11 +38,9 @@ class _GoalsScreenState extends ConsumerState<GoalsScreen>
   }
 
   void _toggleDescription() {
-    if (ref.read(goalProvider).selectedGoal != null) {
-      setState(() {
-        _isDescriptionVisible = !_isDescriptionVisible;
-      });
-    }
+    setState(() {
+      _isDescriptionVisible = !_isDescriptionVisible;
+    });
   }
 
   @override
@@ -104,7 +102,7 @@ class _GoalsScreenState extends ConsumerState<GoalsScreen>
                         ),
                       ),
                       Text(
-                        'METHOD OF TRANSPORT',
+                        'TRAVEL MODE',
                         style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                           color: GlobalTheme.textPrimary,
                           fontWeight: FontWeight.w900,
@@ -132,9 +130,13 @@ class _GoalsScreenState extends ConsumerState<GoalsScreen>
                         ),
                       );
                     },
-                    child: const GoalSwiper(),
+                    child: GoalSwiper(
+                      onGoalSelected: _toggleDescription,
+                    ),
                   ),
                 ),
+
+                const SizedBox(height: 20),
 
                 // Description
                 TweenAnimationBuilder<double>(
@@ -160,39 +162,45 @@ class _GoalsScreenState extends ConsumerState<GoalsScreen>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        GestureDetector(
-                          onTap: _toggleDescription,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  goalState.goals[goalState.currentIndex].title,
-                                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                    color: GlobalTheme.primaryNeon,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                goalState.goals[goalState.currentIndex].title,
+                                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                  color: GlobalTheme.primaryNeon,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              Icon(
-                                _isDescriptionVisible
-                                    ? Icons.keyboard_arrow_up
-                                    : Icons.keyboard_arrow_down,
-                                color: GlobalTheme.primaryNeon,
-                              ),
-                            ],
-                          ),
+                            ),
+                            Icon(
+                              _isDescriptionVisible
+                                  ? Icons.keyboard_arrow_up
+                                  : Icons.keyboard_arrow_down,
+                              color: GlobalTheme.primaryNeon,
+                            ),
+                          ],
                         ),
-                        if (_isDescriptionVisible) ...[
-                          const SizedBox(height: 8),
+                        const SizedBox(height: 8),
+                        if (_isDescriptionVisible)
                           Text(
                             goalState.goals[goalState.currentIndex].description,
                             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: GlobalTheme.textSecondary,
                               height: 1.5,
                             ),
+                          )
+                        else
+                          Text(
+                            goalState.goals[goalState.currentIndex].description,
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: GlobalTheme.textSecondary,
+                              height: 1.5,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        ],
                       ],
                     ),
                   ),

@@ -174,20 +174,27 @@ class _GoalCardState extends State<GoalCard>
               const Spacer(),
 
               // Transport icon
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: GlobalTheme.primaryNeon.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  widget.goal.icon,
-                  size: 50,
-                  color: GlobalTheme.primaryNeon,
+              Expanded(
+                flex: 2,
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: isNeonCard
+                          ? Colors.black.withOpacity(0.15)
+                          : GlobalTheme.primaryNeon.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      widget.goal.icon,
+                      size: 80,
+                      color: isNeonCard ? Colors.black : GlobalTheme.primaryNeon,
+                    ),
+                  ),
                 ),
               ),
 
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
 
               // Goal title
               Text(

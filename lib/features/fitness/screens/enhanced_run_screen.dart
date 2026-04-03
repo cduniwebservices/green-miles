@@ -103,7 +103,7 @@ class _EnhancedRunScreenState extends ConsumerState<EnhancedRunScreen>
             return Column(
               children: [
                 // App bar with activity status
-                _buildAppBar(theme, activityState, actions),
+                _buildAppBar(theme, activityState, fitnessStats, actions),
 
                 // Tab bar for Map/Stats view
                 if (activityState != ActivityState.idle)
@@ -131,7 +131,7 @@ class _EnhancedRunScreenState extends ConsumerState<EnhancedRunScreen>
                       );
                     },
                     child: activityState == ActivityState.idle
-                        ? _buildIdleView(theme, actions)
+                        ? _buildLoadingView(theme)
                         : _buildActiveTrackingView(
                             theme,
                             activityState,
@@ -152,12 +152,15 @@ class _EnhancedRunScreenState extends ConsumerState<EnhancedRunScreen>
   Widget _buildAppBar(
     ThemeData theme,
     ActivityState state,
+    FitnessStats stats,
     ActivityActions actions,
   ) {
     final statusText = _getStatusText(state);
     final statusColor = _getStatusColor(state, theme);
     final mediaQuery = MediaQuery.of(context);
     final isCompact = mediaQuery.size.height < 700;
+    final speedKmh = stats.currentSpeedMps * 3.6;
+    final speedIcon = _getActivityIconFromSpeed(speedKmh);
 
     return Container(
       padding: EdgeInsets.fromLTRB(
@@ -188,7 +191,7 @@ class _EnhancedRunScreenState extends ConsumerState<EnhancedRunScreen>
                   ),
                 ),
                 child: Icon(
-                  _getActivityIcon(actions.activityType),
+                  speedIcon,
                   color: statusColor,
                   size: isCompact ? 24 : 28,
                 ),
@@ -205,7 +208,7 @@ class _EnhancedRunScreenState extends ConsumerState<EnhancedRunScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${actions.activityType.displayName} Tracker',
+                  'Calories Not Carbon',
                   style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     fontSize: isCompact ? 18 : null,
@@ -282,126 +285,26 @@ class _EnhancedRunScreenState extends ConsumerState<EnhancedRunScreen>
       child: TabBar(
         controller: _tabController,
         indicatorColor: theme.primaryColor,
+        indicatorWeight: 3,
         labelColor: theme.primaryColor,
-        unselectedLabelColor: theme.colorScheme.onSurface.withOpacity(0.6),
+        unselectedLabelColor: theme.colorScheme.onSurface.withOpacity(0.35),
+        labelStyle: TextStyle(fontWeight: FontWeight.w700),
         tabs: const [
-          Tab(icon: Icon(Icons.map), text: 'Map'),
-          Tab(icon: Icon(Icons.analytics), text: 'Stats'),
+          Tab(icon: Icon(Icons.map, size: 22), text: 'Map'),
+          Tab(icon: Icon(Icons.analytics, size: 22), text: 'Stats'),
         ],
       ),
     );
   }
 
-  Widget _buildIdleView(ThemeData theme, ActivityActions actions) {
-    final mediaQuery = MediaQuery.of(context);
-    final isCompact = mediaQuery.size.height < 700;
-    final horizontalPadding = mediaQuery.size.width * 0.05;
-
-    return SingleChildScrollView(
-      padding: EdgeInsets.symmetric(
-        horizontal: horizontalPadding.clamp(16.0, 24.0),
-        vertical: isCompact ? 16 : 20,
-      ),
+  Widget _buildLoadingView(ThemeData theme) {
+    return Center(
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SizedBox(height: isCompact ? 16 : 24),
-
-          // Welcome message with better responsive design
-          Container(
-            width: double.infinity,
-            padding: EdgeInsets.all(isCompact ? 20 : 28),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  theme.primaryColor.withOpacity(0.12),
-                  theme.primaryColor.withOpacity(0.04),
-                ],
-              ),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: theme.primaryColor.withOpacity(0.25),
-                width: 1.5,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: theme.primaryColor.withOpacity(0.1),
-                  blurRadius: 20,
-                  offset: const Offset(0, 8),
-                ),
-              ],
-            ),
-            child: Column(
-              children: [
-                Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: theme.primaryColor.withOpacity(0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.directions_run,
-                        size: isCompact ? 48 : 64,
-                        color: theme.primaryColor,
-                      ),
-                    )
-                    .animate()
-                    .scale(duration: 800.ms, curve: Curves.elasticOut)
-                    .then()
-                    .shimmer(
-                      duration: 2000.ms,
-                      color: theme.primaryColor.withOpacity(0.3),
-                    ),
-
-                SizedBox(height: isCompact ? 16 : 20),
-
-                Text(
-                  'Ready to Track Your Fitness!',
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    fontSize: isCompact ? 20 : null,
-                  ),
-                  textAlign: TextAlign.center,
-                ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.2, end: 0),
-
-                SizedBox(height: isCompact ? 8 : 12),
-
-                Text(
-                  'Choose your activity type and start tracking your route, pace, distance, and calories burned in real-time.',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.75),
-                    height: 1.5,
-                    fontSize: isCompact ? 13 : null,
-                  ),
-                  textAlign: TextAlign.center,
-                ).animate().fadeIn(delay: 500.ms).slideY(begin: 0.1, end: 0),
-              ],
-            ),
-          ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.3, end: 0),
-
-          SizedBox(height: isCompact ? 28 : 36),
-
-          // Activity controls with enhanced animations
-          ActivityControlsWidget(
-            state: ActivityState.idle,
-            activityType: _selectedActivityType,
-            onStart: () => _handleStartActivity(actions),
-            onActivityTypeChanged: (type) {
-              setState(() {
-                _selectedActivityType = type;
-              });
-            },
-            accentColor: theme.primaryColor,
-            isLoading: _isLoading,
-          ).animate().fadeIn(delay: 600.ms).slideY(begin: 0.2, end: 0),
-
-          SizedBox(height: isCompact ? 28 : 36),
-
-          // Features showcase with staggered animations
-          _buildFeaturesShowcase(theme),
-
-          SizedBox(height: isCompact ? 16 : 24),
+          CircularProgressIndicator(color: theme.primaryColor),
+          const SizedBox(height: 16),
+          Text('Starting tracking...', style: theme.textTheme.titleMedium),
         ],
       ),
     );
@@ -650,7 +553,7 @@ class _EnhancedRunScreenState extends ConsumerState<EnhancedRunScreen>
   String _getStatusText(ActivityState state) {
     switch (state) {
       case ActivityState.idle:
-        return 'Ready to start tracking';
+        return 'healthier humans, healthier planet';
       case ActivityState.running:
         return 'Activity in progress';
       case ActivityState.paused:
@@ -683,6 +586,16 @@ class _EnhancedRunScreenState extends ConsumerState<EnhancedRunScreen>
         return Icons.directions_bike;
       case ActivityType.hiking:
         return Icons.terrain;
+    }
+  }
+
+  IconData _getActivityIconFromSpeed(double speedKmh) {
+    if (speedKmh < 6.0) {
+      return Icons.directions_walk;
+    } else if (speedKmh < 20.0) {
+      return Icons.directions_run;
+    } else {
+      return Icons.directions_bike;
     }
   }
 
