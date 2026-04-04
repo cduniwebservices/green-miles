@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -72,7 +73,11 @@ class _DebugScreenState extends State<DebugScreen>
       appBar: AppBar(
         title: const Text('🔧 Debug Console', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.black87,
-        iconTheme: const IconThemeData(color: Colors.white),
+        leading: IconButton(
+          icon: const Icon(Icons.close, color: Colors.white),
+          onPressed: () => context.go('/run'),
+        ),
+        actions: const [],
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: GlobalTheme.primaryNeon,
