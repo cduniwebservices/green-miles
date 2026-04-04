@@ -732,9 +732,9 @@ class _InteractiveMapWidgetState extends State<InteractiveMapWidget>
                     ),
                 ],
               ),
-            ],
-          ),
-        );
+          ],
+        ),
+      );
     } catch (e) {
       debugPrint('❌ MapWidget: Error building map - $e');
       return _buildMapFallback(accent);
