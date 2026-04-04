@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import '../../components/app_button.dart';
 import '../../theme/global_theme.dart';
@@ -110,60 +111,12 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                           ],
                         ),
                       ),
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          // Runner (top)
-                          Positioned(
-                            top: 20,
-                            child: Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: GlobalTheme.primaryNeon.withOpacity(0.1),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.directions_run,
-                                size: 60,
-                                color: GlobalTheme.primaryNeon,
-                              ),
-                            ),
-                          ),
-                          // Walker (bottom left)
-                          Positioned(
-                            left: 30,
-                            bottom: 30,
-                            child: Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: GlobalTheme.primaryNeon.withOpacity(0.1),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.directions_walk,
-                                size: 60,
-                                color: GlobalTheme.primaryNeon,
-                              ),
-                            ),
-                          ),
-                          // Cyclist (bottom right)
-                          Positioned(
-                            right: 30,
-                            bottom: 30,
-                            child: Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: GlobalTheme.primaryNeon.withOpacity(0.1),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.pedal_bike,
-                                size: 60,
-                                color: GlobalTheme.primaryNeon,
-                              ),
-                            ),
-                          ),
-                        ],
+                      child: Center(
+                        child: SvgPicture.asset(
+                          'assets/icons/icon-logo-4-color.svg',
+                          fit: BoxFit.contain,
+                          width: MediaQuery.of(context).size.width * 0.5,
+                        ),
                       ),
                     ),
                   ),

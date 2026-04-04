@@ -48,6 +48,9 @@ dependencies:
   # Crash reporting & monitoring
   sentry_flutter: ^9.0.0
 
+  # SVG rendering
+  flutter_svg: ^2.0.0
+
   # Hardware Access
   sensors_plus: ^4.0.2
 
