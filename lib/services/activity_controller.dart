@@ -398,13 +398,12 @@ void _onLocationUpdate(dynamic locationData) {
       if (distance >= _minimumDistanceThreshold) {
         debugPrint('✅ ActivityController: Movement significant, updating stats');
         _totalDistance += distance;
-...
-          _routePoints.add(newLocation);
+        _routePoints.add(newLocation);
 
-          // Update current speed from GPS if available
-          if (locationData.speed != null && locationData.speed > 0) {
-            _currentSpeed = locationData.speed;
-          } else {
+        // Update current speed from GPS if available
+        if (locationData.speed != null && locationData.speed > 0) {
+          _currentSpeed = locationData.speed;
+        } else {
             // Calculate speed from distance and time
             final timeDiff = timestamp
                 .difference(_getLastLocationTime())

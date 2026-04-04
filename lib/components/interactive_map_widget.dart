@@ -846,7 +846,6 @@ class _InteractiveMapWidgetState extends State<InteractiveMapWidget>
             ),
           ],
         ),
-      ),
     );
   }
 

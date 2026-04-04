@@ -10,6 +10,7 @@ import '../../../components/interactive_map_widget.dart';
 import '../../../components/fitness_tracking_widgets.dart';
 import '../../../services/navigation_service.dart';
 import '../../../services/haptic_service.dart';
+import '../../../theme/global_theme.dart';
 
 /// Million-dollar level fitness tracking screen with real-time GPS integration
 class EnhancedRunScreen extends ConsumerStatefulWidget {

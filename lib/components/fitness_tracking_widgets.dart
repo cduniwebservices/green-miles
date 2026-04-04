@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../models/fitness_models.dart';
 import '../services/haptic_service.dart';
+import '../theme/global_theme.dart';
 
 /// Real-time fitness stats display widget
 class FitnessStatsWidget extends StatelessWidget {
