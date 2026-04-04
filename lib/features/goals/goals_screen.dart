@@ -17,7 +17,8 @@ class GoalsScreen extends ConsumerStatefulWidget {
 class _GoalsScreenState extends ConsumerState<GoalsScreen>
     with TickerProviderStateMixin {
   late AnimationController _controller;
-  bool _isDescriptionVisible = false;
+  bool _showPanel = false;
+  bool _isDescriptionExpanded = false;
 
   @override
   void initState() {
@@ -37,9 +38,16 @@ class _GoalsScreenState extends ConsumerState<GoalsScreen>
     super.dispose();
   }
 
+  void _showDescriptionPanel() {
+    setState(() {
+      _showPanel = true;
+      _isDescriptionExpanded = false;
+    });
+  }
+
   void _toggleDescription() {
     setState(() {
-      _isDescriptionVisible = !_isDescriptionVisible;
+      _isDescriptionExpanded = !_isDescriptionExpanded;
     });
   }
 
@@ -131,80 +139,74 @@ class _GoalsScreenState extends ConsumerState<GoalsScreen>
                       );
                     },
                     child: GoalSwiper(
-                      onGoalSelected: _toggleDescription,
+                      onGoalSelected: _showDescriptionPanel,
                     ),
                   ),
                 ),
 
                 const SizedBox(height: 20),
 
-                // Description
-                TweenAnimationBuilder<double>(
-                  duration: const Duration(milliseconds: 600),
-                  tween: Tween<double>(begin: 0.0, end: 1.0),
-                  curve: Curves.easeOut,
-                  builder: (context, value, child) {
-                    return Opacity(
-                      opacity: value.clamp(0.0, 1.0),
-                      child: Transform.translate(
-                        offset: Offset(0, 20 * (1 - value)),
-                        child: child,
+                // Description (hidden until card is tapped)
+                if (_showPanel)
+                  TweenAnimationBuilder<double>(
+                    duration: const Duration(milliseconds: 600),
+                    tween: Tween<double>(begin: 0.0, end: 1.0),
+                    curve: Curves.easeOut,
+                    builder: (context, value, child) {
+                      return Opacity(
+                        opacity: value.clamp(0.0, 1.0),
+                        child: Transform.translate(
+                          offset: Offset(0, 20 * (1 - value)),
+                          child: child,
+                        ),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: GlobalTheme.surfaceCard,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: GlobalTheme.cardShadow,
                       ),
-                    );
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: GlobalTheme.surfaceCard,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: GlobalTheme.cardShadow,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                goalState.goals[goalState.currentIndex].title,
-                                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                  color: GlobalTheme.primaryNeon,
-                                  fontWeight: FontWeight.bold,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  goalState.goals[goalState.currentIndex].title,
+                                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    color: GlobalTheme.primaryNeon,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
-                            ),
-                            Icon(
-                              _isDescriptionVisible
-                                  ? Icons.keyboard_arrow_up
-                                  : Icons.keyboard_arrow_down,
-                              color: GlobalTheme.primaryNeon,
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        if (_isDescriptionVisible)
-                          Text(
-                            goalState.goals[goalState.currentIndex].description,
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: GlobalTheme.textSecondary,
-                              height: 1.5,
-                            ),
-                          )
-                        else
-                          Text(
-                            goalState.goals[goalState.currentIndex].description,
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: GlobalTheme.textSecondary,
-                              height: 1.5,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                              GestureDetector(
+                                onTap: _toggleDescription,
+                                child: Icon(
+                                  _isDescriptionExpanded
+                                      ? Icons.keyboard_arrow_up
+                                      : Icons.keyboard_arrow_down,
+                                  color: GlobalTheme.primaryNeon,
+                                ),
+                              ),
+                            ],
                           ),
-                      ],
+                          const SizedBox(height: 8),
+                          if (_isDescriptionExpanded)
+                            Text(
+                              goalState.goals[goalState.currentIndex].description,
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: GlobalTheme.textSecondary,
+                                height: 1.5,
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
 
                 const SizedBox(height: 24),
 

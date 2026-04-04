@@ -603,23 +603,10 @@ class _InteractiveMapWidgetState extends State<InteractiveMapWidget>
         return _buildMapFallback(accent);
       }
 
-      return Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(28),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(28),
-          child: Stack(
-            children: [
-              // Enhanced FlutterMap with improved error handling
-              FlutterMap(
+      return Stack(
+        children: [
+          // FlutterMap with clean display
+          FlutterMap(
                 mapController: _mapController,
                 options: MapOptions(
                   initialCenter:
@@ -747,8 +734,7 @@ class _InteractiveMapWidgetState extends State<InteractiveMapWidget>
               ),
             ],
           ),
-        ),
-      );
+        );
     } catch (e) {
       debugPrint('❌ MapWidget: Error building map - $e');
       return _buildMapFallback(accent);

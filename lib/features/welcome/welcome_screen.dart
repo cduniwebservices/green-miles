@@ -115,7 +115,10 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         child: SvgPicture.asset(
                           'assets/icons/icon-logo-4-color.svg',
                           fit: BoxFit.contain,
-                          width: MediaQuery.of(context).size.width * 0.5,
+                          width: MediaQuery.of(context).size.width * 0.75,
+                          theme: const SvgTheme(
+                            currentColor: Color(0xFF7fb768),
+                          ),
                         ),
                       ),
                     ),
