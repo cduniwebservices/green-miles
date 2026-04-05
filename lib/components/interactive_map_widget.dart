@@ -171,6 +171,7 @@ class _InteractiveMapWidgetState extends ConsumerState<InteractiveMapWidget>
     // Watch real data providers
     final currentLocation = ref.watch(currentLocationProvider);
     final routePoints = ref.watch(routePointsProvider);
+    final stats = ref.watch(fitnessStatsProvider);
 
     return AnimatedBuilder(
       animation: _pulseController,
@@ -338,7 +339,7 @@ class _InteractiveMapWidgetState extends ConsumerState<InteractiveMapWidget>
                               opacity: _mapRevealAnimation,
                               child: SlideTransition(
                                 position: _slideAnimation,
-                                child: _buildMap(accent),
+                                child: _buildMap(accent, currentLocation, routePoints),
                               ),
                             ),
                           ),
@@ -347,7 +348,7 @@ class _InteractiveMapWidgetState extends ConsumerState<InteractiveMapWidget>
                     ),
 
                   // Top overlay with timer and stats
-                  _buildTopOverlay(theme, accent),
+                  _buildTopOverlay(theme, accent, stats),
 
                   // Enhanced loading state with polished appearance - no blur
                   if (_isLoading)
@@ -564,7 +565,8 @@ class _InteractiveMapWidgetState extends ConsumerState<InteractiveMapWidget>
                     ),
 
                   // Map controls overlay - properly positioned
-                  if (_isMapReady && !_hasError) _buildMapControls(accent),
+                  if (_isMapReady && !_hasError) 
+                    _buildMapControls(accent, currentLocation, routePoints),
 
                   // Bottom control bar
                   if (_isMapReady && !_hasError)
@@ -578,7 +580,7 @@ class _InteractiveMapWidgetState extends ConsumerState<InteractiveMapWidget>
     );
   }
 
-  Widget _buildMap(Color accent) {
+  Widget _buildMap(Color accent, LatLng? currentLocation, List<LatLng> routePoints) {
     try {
       // Safety check for map controller
       if (!_isMapControllerReady) {
@@ -591,7 +593,7 @@ class _InteractiveMapWidgetState extends ConsumerState<InteractiveMapWidget>
           FlutterMap(
             mapController: _mapController,
             options: MapOptions(
-              initialCenter: _currentLocation ?? const LatLng(51.5074, -0.1278),
+              initialCenter: currentLocation ?? const LatLng(51.5074, -0.1278),
               initialZoom: 15.0,
               minZoom: 5.0,
               maxZoom: 18.0,
@@ -615,26 +617,26 @@ class _InteractiveMapWidgetState extends ConsumerState<InteractiveMapWidget>
                   duration: Duration(milliseconds: 300),
                 ),
               ),
-              if (widget.showRoute && _routePoints.isNotEmpty)
+              if (widget.showRoute && routePoints.isNotEmpty)
                 PolylineLayer(
                   polylines: [
                     Polyline(
-                      points: _routePoints,
+                      points: routePoints,
                       strokeWidth: 5.0,
                       color: widget.routeColor ?? accent,
                     ),
                     Polyline(
-                      points: _routePoints,
+                      points: routePoints,
                       strokeWidth: 8.0,
                       color: Colors.black.withOpacity(0.3),
                     ),
                   ],
                 ),
-              if (widget.showCurrentLocation && _currentLocation != null)
+              if (widget.showCurrentLocation && currentLocation != null)
                 MarkerLayer(
                   markers: [
                     Marker(
-                      point: _currentLocation!,
+                      point: currentLocation,
                       width: 60,
                       height: 60,
                       child: AnimatedBuilder(
@@ -726,14 +728,12 @@ class _InteractiveMapWidgetState extends ConsumerState<InteractiveMapWidget>
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(28),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-          child: Container(
-            decoration: BoxDecoration(color: Colors.white.withOpacity(0.03)),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
+        child: Container(
+          decoration: BoxDecoration(color: Colors.white.withOpacity(0.03)),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
                   Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
@@ -776,7 +776,7 @@ class _InteractiveMapWidgetState extends ConsumerState<InteractiveMapWidget>
     );
   }
 
-  Widget _buildTopOverlay(ThemeData theme, Color accent) {
+  Widget _buildTopOverlay(ThemeData theme, Color accent, FitnessStats stats) {
     return Positioned(
       top: 0,
       left: 0,
@@ -800,9 +800,9 @@ class _InteractiveMapWidgetState extends ConsumerState<InteractiveMapWidget>
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildStatCard('00:15:32', 'TIME', accent),
-                _buildStatCard('1.2 km', 'DISTANCE', accent),
-                _buildStatCard('125', 'AVG BPM', accent),
+                _buildStatCard(stats.formattedDuration, 'TIME', accent),
+                _buildStatCard(stats.formattedDistance, 'DISTANCE', accent),
+                _buildStatCard('${stats.estimatedCalories}', 'CALORIES', accent),
               ],
             ),
           ),
@@ -846,33 +846,36 @@ class _InteractiveMapWidgetState extends ConsumerState<InteractiveMapWidget>
     );
   }
 
-  Widget _buildMapControls(Color accent) {
+  Widget _buildMapControls(Color accent, LatLng? currentLocation, List<LatLng> routePoints) {
+    if (currentLocation == null) return const SizedBox.shrink();
+
     return Positioned(
       right: 16,
       top: 140,
       child: Column(
         children: [
           // Current location button
-          if (_currentLocation != null)
-            _buildMapControlButton(
-              icon: _isLocationLoading
-                  ? Icons.gps_not_fixed
-                  : Icons.my_location,
-              onPressed: _centerOnCurrentLocation,
-              tooltip: 'Center on Location',
-              accent: accent,
-              isLoading: _isLocationLoading,
-            ),
-          const SizedBox(height: 12),
+          _buildMapControlButton(
+            icon: _isLocationLoading
+                ? Icons.gps_not_fixed
+                : Icons.my_location,
+            onPressed: () => _centerOnLocation(currentLocation),
+            tooltip: 'Center on Location',
+            accent: accent,
+            isLoading: _isLocationLoading,
+          ),
+          
           // Fit to route button
-          if (_routePoints.isNotEmpty)
+          if (routePoints.length > 1) ...[
+            const SizedBox(height: 12),
             _buildMapControlButton(
               icon: Icons.zoom_out_map,
-              onPressed: _fitToRoute,
+              onPressed: () => _fitToRoute(routePoints),
               tooltip: 'Fit to Route',
               accent: accent,
               isLoading: _isLocationLoading,
             ),
+          ],
         ],
       ),
     );
@@ -1074,11 +1077,11 @@ class _InteractiveMapWidgetState extends ConsumerState<InteractiveMapWidget>
     );
   }
 
-  void _centerOnCurrentLocation() {
-    if (_currentLocation != null && _isMapControllerReady) {
+  void _centerOnLocation(LatLng location) {
+    if (_isMapControllerReady) {
       setState(() => _isLocationLoading = true);
 
-      _mapController.move(_currentLocation!, 16.0);
+      _mapController.move(location, 16.0);
 
       Future.delayed(const Duration(milliseconds: 500), () {
         if (mounted) {
@@ -1088,17 +1091,17 @@ class _InteractiveMapWidgetState extends ConsumerState<InteractiveMapWidget>
     }
   }
 
-  void _fitToRoute() {
-    if (_routePoints.isNotEmpty && _isMapControllerReady) {
+  void _fitToRoute(List<LatLng> routePoints) {
+    if (routePoints.isNotEmpty && _isMapControllerReady) {
       setState(() => _isLocationLoading = true);
 
       // Calculate bounds for route points
-      double minLat = _routePoints.first.latitude;
-      double maxLat = _routePoints.first.latitude;
-      double minLng = _routePoints.first.longitude;
-      double maxLng = _routePoints.first.longitude;
+      double minLat = routePoints.first.latitude;
+      double maxLat = routePoints.first.latitude;
+      double minLng = routePoints.first.longitude;
+      double maxLng = routePoints.first.longitude;
 
-      for (final point in _routePoints) {
+      for (final point in routePoints) {
         minLat = math.min(minLat, point.latitude);
         maxLat = math.max(maxLat, point.latitude);
         minLng = math.min(minLng, point.longitude);
