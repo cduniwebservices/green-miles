@@ -181,12 +181,12 @@ class _DebugScreenState extends ConsumerState<DebugScreen>
         title: const Text('🔧 Debug Console', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.black87,
         automaticallyImplyLeading: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.close, color: Colors.white),
-            onPressed: () => context.go('/run'),
-          ),
-        ],
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.close, color: Colors.white),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ],
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: GlobalTheme.primaryNeon,

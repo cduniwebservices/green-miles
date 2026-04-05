@@ -509,12 +509,12 @@ class ActivityControlsWidget extends StatelessWidget {
         onPressed = onPause;
         color = GlobalTheme.statusSuccess;
         break;
-      case ActivityState.paused:
-        text = 'Resume';
-        icon = Icons.play_arrow;
-        onPressed = onResume;
-        color = accent;
-        break;
+    case ActivityState.paused:
+      text = 'Resume';
+      icon = Icons.play_arrow;
+      onPressed = onResume;
+      color = GlobalTheme.primaryNeon;
+      break;
       case ActivityState.completed:
         text = 'Start New';
         icon = Icons.refresh;

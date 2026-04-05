@@ -347,27 +347,15 @@ class _EnhancedRunScreenState extends ConsumerState<EnhancedRunScreen>
             enableTracking: state.isActive,
             routeColor: theme.primaryColor,
             accentColor: theme.primaryColor,
-          ),
-        ),
+              ),
+            ),
 
-        // Floating timer
-        Positioned(
-          top: 20,
-          left: 20,
-          right: 20,
-          child: FitnessTimerWidget(
-            duration: stats.activeDuration,
-            state: state,
-            accentColor: theme.primaryColor,
-          ).animate().fadeIn(delay: 300.ms).slideY(begin: -0.3, end: 0),
-        ),
-
-        // Bottom controls
-        Positioned(
-          bottom: 20,
-          left: 20,
-          right: 20,
-          child: ActivityControlsWidget(
+            // Bottom controls
+            Positioned(
+              bottom: 20,
+              left: 20,
+              right: 20,
+              child: ActivityControlsWidget(
             state: state,
             activityType: actions.activityType,
             onPause: () => _handlePauseActivity(actions),
@@ -817,7 +805,7 @@ class _EnhancedRunScreenState extends ConsumerState<EnhancedRunScreen>
         ),
         backgroundColor: Theme.of(context).colorScheme.error,
         behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+        margin: const EdgeInsets.fromLTRB(16, 16, 16, 180),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         duration: const Duration(seconds: 4),
         action: SnackBarAction(

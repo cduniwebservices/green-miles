@@ -29,13 +29,18 @@ class NavigationService {
   }
 
   /// Navigate back with haptic feedback
-  static void goBack(BuildContext context) {
+  /// For GoRouter, use navigate to specific routes instead of pop
+  static void goBack(BuildContext context, {String? fallbackRoute}) {
     if (Navigator.of(context).canPop()) {
       Navigator.of(context).pop();
-    } else {
-      // Fallback to run screen if can't pop (session summary edge case)
-      context.go('/run');
+    } else if (fallbackRoute != null) {
+      context.go(fallbackRoute);
     }
+  }
+
+  /// Navigate back to run screen (main activity screen)
+  static void goBackToRun(BuildContext context) {
+    context.go('/run');
   }
 
   /// Check if we can navigate back

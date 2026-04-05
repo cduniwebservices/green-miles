@@ -81,22 +81,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
           ),
         ),
       ),
-      floatingActionButton:
-          FloatingActionButton.extended(
-            onPressed: () => NavigationService.goToRun(context),
-            backgroundColor: GlobalTheme.primaryAction,
-            foregroundColor: Colors.white,
-            elevation: 6,
-            icon: const Icon(Icons.play_arrow_rounded),
-            label: const Text(
-              'New Activity',
-              style: TextStyle(fontWeight: FontWeight.w600),
-            ),
-          ).animate().scale(
-            delay: 800.ms,
-            duration: 400.ms,
-            curve: Curves.easeOutBack,
-          ),
+      floatingActionButton: null,
     );
   }
 
@@ -118,7 +103,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
               color: Colors.transparent,
               child: InkWell(
                 borderRadius: BorderRadius.circular(GlobalTheme.radiusMedium),
-                onTap: () => NavigationService.goBack(context),
+                onTap: () => context.go('/goals'),
                 child: const Icon(
                   Icons.arrow_back_ios_rounded,
                   color: GlobalTheme.textPrimary,

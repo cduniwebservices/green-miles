@@ -930,7 +930,11 @@ class _InteractiveMapWidgetState extends ConsumerState<InteractiveMapWidget>
                       valueColor: AlwaysStoppedAnimation<Color>(accent),
                     ),
                   )
-                : Icon(icon, color: accent, size: 24),
+                : Icon(
+              icon,
+              color: accent.computeLuminance() > 0.5 ? Colors.black : Colors.white,
+              size: 24,
+            ),
           ),
         ),
       ),
