@@ -296,11 +296,6 @@ class LocationService {
 
   /// Handle location updates from background isolate
   void _onBackgroundLocationUpdate(dynamic message) {
-    if (message is SendPort) {
-      // Store send port for communication
-      return;
-    }
-
     if (message is Map<String, dynamic>) {
       if (message['type'] == 'location') {
         try {

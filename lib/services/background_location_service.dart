@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:isolate';
 import 'package:flutter/material.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:geolocator/geolocator.dart';
@@ -12,6 +13,7 @@ class BackgroundLocationService {
   BackgroundLocationService._internal();
 
   bool _isInitialized = false;
+  ReceivePort? _receivePort;
 
   /// Initialize foreground task
   Future<void> initialize() async {
@@ -33,7 +35,8 @@ class BackgroundLocationService {
         showNotification: true,
         playSound: false,
       ),
-      foregroundTaskOptions: const ForegroundTaskOptions(
+      foregroundTaskOptions: ForegroundTaskOptions(
+        eventAction: ForegroundTaskEventAction.repeat,
         autoRunOnBoot: false,
         allowWifiLock: true,
         allowWakeLock: true,
@@ -43,6 +46,9 @@ class BackgroundLocationService {
     _isInitialized = true;
     debugPrint('✅ BackgroundLocationService: Initialized');
   }
+
+  /// Get receive port for listening to data from background
+  ReceivePort? get receivePort => _receivePort;
 
   /// Start foreground task with location tracking
   Future<bool> startTracking() async {
@@ -55,7 +61,7 @@ class BackgroundLocationService {
 
       // Request notification permission (Android 13+)
       final notificationPermission = await FlutterForegroundTask.requestNotificationPermission();
-      if (!notificationPermission) {
+      if (notificationPermission == NotificationPermission.denied) {
         debugPrint('❌ BackgroundLocationService: Notification permission denied');
         return false;
       }
@@ -67,8 +73,8 @@ class BackgroundLocationService {
         callback: startLocationTrackingCallback,
       );
 
-      debugPrint('✅ BackgroundLocationService: Service started - success: ${result.success}');
-      return result.success;
+      debugPrint('✅ BackgroundLocationService: Service started - success: ${result is ServiceRequestSuccess}');
+      return result is ServiceRequestSuccess;
     } catch (e) {
       debugPrint('❌ BackgroundLocationService: Failed to start service: $e');
       return false;
@@ -105,6 +111,8 @@ class BackgroundLocationService {
 
   /// Dispose resources
   void dispose() {
+    _receivePort?.close();
+    _receivePort = null;
     _isInitialized = false;
   }
 }
