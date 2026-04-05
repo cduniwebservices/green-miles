@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:go_router/go_router.dart';
 import '../../../theme/global_theme.dart';
 import '../../../models/fitness_models.dart';
 import '../../../providers/activity_providers.dart';
