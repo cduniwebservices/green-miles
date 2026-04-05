@@ -183,27 +183,19 @@ class _EnhancedRunScreenState extends ConsumerState<EnhancedRunScreen>
       ),
       child: Row(
         children: [
-          Container(
-                padding: const EdgeInsets.all(2),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: statusColor.withOpacity(0.3),
-                    width: 2,
-                  ),
-                ),
-                child: Icon(
-                  speedIcon,
-                  color: statusColor,
-                  size: isCompact ? 24 : 28,
-                ),
-              )
-              .animate()
-              .scale(duration: 400.ms, curve: Curves.elasticOut)
-              .then()
-              .shimmer(duration: 2000.ms, color: statusColor.withOpacity(0.3)),
+          CircleAvatar(
+            radius: 22,
+            backgroundColor: GlobalTheme.primaryNeon,
+            child: Icon(
+              speedIcon,
+              color: Colors.black,
+              size: isCompact ? 22 : 24,
+            ),
+          )
+          .animate()
+          .scale(duration: 400.ms, curve: Curves.elasticOut),
 
-          SizedBox(width: isCompact ? 10 : 12),
+          const SizedBox(width: 12),
 
           Expanded(
             child: Column(
@@ -211,34 +203,21 @@ class _EnhancedRunScreenState extends ConsumerState<EnhancedRunScreen>
               children: [
                 GestureDetector(
                   onTap: () => context.go('/debug'),
-                  child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Calories Not Carbon',
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        fontSize: isCompact ? 18 : null,
-                      ),
+                  child: Text(
+                    'Calories Not Carbon',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: GlobalTheme.textPrimary,
+                      fontWeight: FontWeight.w600,
                     ),
-                    const SizedBox(width: 8),
-                    Icon(
-                      speedIcon,
-                      color: GlobalTheme.primaryNeon,
-                      size: isCompact ? 20 : 24,
-                    ),
-                  ],
-                ),
+                  ),
                 ).animate().fadeIn(delay: 200.ms).slideX(begin: -0.2, end: 0),
 
-                SizedBox(height: isCompact ? 1 : 2),
+                const SizedBox(height: 2),
 
                 Text(
                   statusText,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: statusColor,
-                    fontWeight: FontWeight.w600,
-                    fontSize: isCompact ? 12 : null,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: GlobalTheme.textSecondary,
                   ),
                 ).animate().fadeIn(delay: 400.ms).slideX(begin: -0.1, end: 0),
               ],
