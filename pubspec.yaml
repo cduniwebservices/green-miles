@@ -54,6 +54,10 @@ dependencies:
   # Hardware Access
   sensors_plus: ^4.0.2
 
+  # Sharing & File Access
+  share_plus: ^10.1.0
+  path_provider: ^2.1.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

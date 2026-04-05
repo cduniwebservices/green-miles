@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -8,6 +9,8 @@ import 'package:uuid/uuid.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../models/fitness_models.dart';
 import '../../services/local_storage_service.dart';
 import '../../services/sync_service.dart';
@@ -131,6 +134,45 @@ class _DebugScreenState extends ConsumerState<DebugScreen>
     });
   }
 
+  Future<void> _shareLogs() async {
+    if (_logs.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No logs to share')),
+        );
+      }
+      return;
+    }
+
+    try {
+      final directory = await getTemporaryDirectory();
+      final file = File('${directory.path}/calories_not_carbon_logs.txt');
+      
+      final buffer = StringBuffer();
+      buffer.writeln('Calories Not Carbon - Debug Logs');
+      buffer.writeln('Generated: ${DateTime.now()}');
+      buffer.writeln('--------------------------------');
+      for (final log in _logs) {
+        buffer.writeln(log);
+      }
+
+      await file.writeAsString(buffer.toString());
+
+      await Share.shareXFiles(
+        [XFile(file.path)],
+        subject: 'Calories Not Carbon Debug Logs',
+        text: 'Streaming logs from the debug console.',
+      );
+    } catch (e) {
+      debugPrint('❌ Error sharing logs: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to share logs: $e')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -243,6 +285,12 @@ class _DebugScreenState extends ConsumerState<DebugScreen>
                 style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
               ),
               const Spacer(),
+              TextButton.icon(
+                onPressed: _shareLogs,
+                icon: const Icon(Icons.share, size: 16, color: GlobalTheme.primaryNeon),
+                label: const Text('Share', style: TextStyle(color: GlobalTheme.primaryNeon)),
+              ),
+              const SizedBox(width: 8),
               TextButton(
                 onPressed: () => setState(() => _logs.clear()),
                 child: const Text('Clear', style: TextStyle(color: Colors.grey)),
