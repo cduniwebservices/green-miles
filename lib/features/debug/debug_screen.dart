@@ -138,11 +138,13 @@ class _DebugScreenState extends ConsumerState<DebugScreen>
       appBar: AppBar(
         title: const Text('🔧 Debug Console', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.black87,
-        leading: IconButton(
-          icon: const Icon(Icons.close, color: Colors.white),
-          onPressed: () => context.go('/run'),
-        ),
-        actions: const [],
+        automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.close, color: Colors.white),
+            onPressed: () => context.go('/run'),
+          ),
+        ],
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: GlobalTheme.primaryNeon,

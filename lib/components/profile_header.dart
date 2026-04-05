@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../theme/global_theme.dart';
+import '../services/navigation_service.dart';
 
 class ProfileHeader extends ConsumerWidget {
   final bool showNotification;
@@ -41,11 +42,11 @@ class ProfileHeader extends ConsumerWidget {
           ),
         ),
 
-        // Notification icon
+        // History icon
         if (showNotification)
           IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.notifications_outlined, size: 24),
+            onPressed: () => NavigationService.goToHistory(context),
+            icon: const Icon(Icons.history_rounded, size: 24),
             style: IconButton.styleFrom(
               foregroundColor: GlobalTheme.textSecondary,
               backgroundColor: GlobalTheme.surfaceCard,
