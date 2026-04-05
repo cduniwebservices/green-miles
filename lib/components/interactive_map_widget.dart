@@ -6,6 +6,7 @@ import 'dart:math' as math;
 import 'dart:ui';
 import '../theme/global_theme.dart';
 import '../providers/activity_providers.dart';
+import '../models/fitness_models.dart';
 
 /// Simple interactive map widget for fitness tracking
 class InteractiveMapWidget extends ConsumerStatefulWidget {

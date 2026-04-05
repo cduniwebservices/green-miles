@@ -5,6 +5,7 @@ import 'package:flutter_map/flutter_map.dart';
 import '../../../theme/global_theme.dart';
 import '../../../models/fitness_models.dart';
 import '../../../providers/activity_providers.dart';
+import '../../../providers/goal_provider.dart';
 import '../../../services/navigation_service.dart';
 
 /// Session summary screen shown after completing a run
