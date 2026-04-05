@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'dart:math' as math;
 import 'dart:ui';
 import '../theme/global_theme.dart';
+import '../providers/activity_providers.dart';
 
 /// Simple interactive map widget for fitness tracking
-class InteractiveMapWidget extends StatefulWidget {
+class InteractiveMapWidget extends ConsumerStatefulWidget {
   final bool showCurrentLocation;
   final bool showRoute;
   final bool enableTracking;
@@ -25,10 +27,10 @@ class InteractiveMapWidget extends StatefulWidget {
   });
 
   @override
-  State<InteractiveMapWidget> createState() => _InteractiveMapWidgetState();
+  ConsumerState<InteractiveMapWidget> createState() => _InteractiveMapWidgetState();
 }
 
-class _InteractiveMapWidgetState extends State<InteractiveMapWidget>
+class _InteractiveMapWidgetState extends ConsumerState<InteractiveMapWidget>
     with TickerProviderStateMixin {
   late MapController _mapController;
   late AnimationController _pulseController;
@@ -43,8 +45,6 @@ class _InteractiveMapWidgetState extends State<InteractiveMapWidget>
   late Animation<double> _rotationAnimation;
 
   // State
-  LatLng? _currentLocation;
-  List<LatLng> _routePoints = [];
   bool _isLoading = true;
   bool _hasError = false;
   String _errorMessage = '';
@@ -135,14 +135,7 @@ class _InteractiveMapWidgetState extends State<InteractiveMapWidget>
       // Simulate service initialization with realistic timing
       await Future.delayed(const Duration(milliseconds: 800));
 
-      // Set default location and route points
       setState(() {
-        _currentLocation = const LatLng(51.5074, -0.1278); // London
-        _routePoints = [
-          const LatLng(51.5074, -0.1278),
-          const LatLng(51.5084, -0.1288),
-          const LatLng(51.5094, -0.1298),
-        ];
         _isLoading = false;
         _isMapReady = true;
       });
@@ -174,6 +167,10 @@ class _InteractiveMapWidgetState extends State<InteractiveMapWidget>
     final theme = Theme.of(context);
     final accent = widget.accentColor ?? GlobalTheme.primaryNeon;
     final screenHeight = MediaQuery.of(context).size.height;
+
+    // Watch real data providers
+    final currentLocation = ref.watch(currentLocationProvider);
+    final routePoints = ref.watch(routePointsProvider);
 
     return AnimatedBuilder(
       animation: _pulseController,

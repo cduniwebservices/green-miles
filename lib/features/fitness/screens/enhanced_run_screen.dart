@@ -276,17 +276,17 @@ class _EnhancedRunScreenState extends ConsumerState<EnhancedRunScreen>
 
   Widget _buildTabBar(ThemeData theme) {
     return Container(
-      color: theme.cardColor,
+      color: Colors.black87,
       child: TabBar(
         controller: _tabController,
-        indicatorColor: theme.primaryColor,
+        indicatorColor: GlobalTheme.primaryNeon,
         indicatorWeight: 3,
-        labelColor: theme.primaryColor,
-        unselectedLabelColor: theme.colorScheme.onSurface.withOpacity(0.35),
-        labelStyle: TextStyle(fontWeight: FontWeight.w700),
+        labelColor: GlobalTheme.primaryNeon,
+        unselectedLabelColor: Colors.grey,
+        labelStyle: const TextStyle(fontWeight: FontWeight.bold),
         tabs: const [
           Tab(icon: Icon(Icons.map, size: 24), text: 'Map'),
-          Tab(icon: Icon(Icons.storage, size: 24), text: 'Stats'),
+          Tab(icon: Icon(Icons.analytics_outlined, size: 24), text: 'Stats'),
         ],
       ),
     );
@@ -297,9 +297,15 @@ class _EnhancedRunScreenState extends ConsumerState<EnhancedRunScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircularProgressIndicator(color: theme.primaryColor),
+          CircularProgressIndicator(color: GlobalTheme.primaryNeon),
           const SizedBox(height: 16),
-          Text('Starting tracking...', style: theme.textTheme.titleMedium),
+          Text(
+            'Searching for GPS satellites...',
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
         ],
       ),
     );
@@ -548,7 +554,7 @@ class _EnhancedRunScreenState extends ConsumerState<EnhancedRunScreen>
   String _getStatusText(ActivityState state) {
     switch (state) {
       case ActivityState.idle:
-        return 'healthier humans, healthier planet';
+        return 'HEALTHY HUMANS, HEALTHY PLANET';
       case ActivityState.running:
         return 'Activity in progress';
       case ActivityState.paused:
@@ -565,7 +571,7 @@ class _EnhancedRunScreenState extends ConsumerState<EnhancedRunScreen>
       case ActivityState.running:
         return theme.primaryColor;
       case ActivityState.paused:
-        return GlobalTheme.primaryAccent;
+        return GlobalTheme.statusSuccess;
       case ActivityState.completed:
         return Colors.green;
     }
@@ -811,7 +817,7 @@ class _EnhancedRunScreenState extends ConsumerState<EnhancedRunScreen>
         ),
         backgroundColor: Theme.of(context).colorScheme.error,
         behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.all(16),
+        margin: const EdgeInsets.fromLTRB(16, 16, 16, 100),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         duration: const Duration(seconds: 4),
         action: SnackBarAction(

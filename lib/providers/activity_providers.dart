@@ -36,6 +36,13 @@ final routePointsProvider =
       return RoutePointsNotifier(controller);
     });
 
+/// Provider for current location
+final currentLocationProvider =
+    StateNotifierProvider<CurrentLocationNotifier, LatLng?>((ref) {
+      final controller = ref.watch(activityControllerProvider);
+      return CurrentLocationNotifier(controller);
+    });
+
 /// Activity session state notifier
 class ActivitySessionNotifier extends StateNotifier<ActivitySession?> {
   final ActivityController _controller;
@@ -115,6 +122,28 @@ class RoutePointsNotifier extends StateNotifier<List<LatLng>> {
   void _onControllerUpdate() {
     if (mounted) {
       state = _controller.routePoints;
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.removeListener(_onControllerUpdate);
+    super.dispose();
+  }
+}
+
+/// Current location state notifier
+class CurrentLocationNotifier extends StateNotifier<LatLng?> {
+  final ActivityController _controller;
+
+  CurrentLocationNotifier(this._controller) : super(null) {
+    _controller.addListener(_onControllerUpdate);
+    state = _controller.lastKnownLocation;
+  }
+
+  void _onControllerUpdate() {
+    if (mounted) {
+      state = _controller.lastKnownLocation;
     }
   }
 

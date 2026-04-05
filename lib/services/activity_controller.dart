@@ -55,6 +55,7 @@ class ActivityController extends ChangeNotifier {
   FitnessStats get stats => _stats;
   List<LatLng> get routePoints => List.unmodifiable(_routePoints);
   List<ActivityWaypoint> get waypoints => List.unmodifiable(_waypoints);
+  LatLng? get lastKnownLocation => _lastKnownLocation;
   bool get isTracking => _state == ActivityState.running;
   bool get isPaused => _state == ActivityState.paused;
   bool get canStart => _state == ActivityState.idle;

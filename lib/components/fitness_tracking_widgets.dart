@@ -98,7 +98,7 @@ class FitnessStatsWidget extends StatelessWidget {
         break;
       case ActivityState.paused:
         icon = Icons.pause_circle_filled;
-        color = GlobalTheme.primaryAccent;
+        color = GlobalTheme.statusSuccess;
         break;
       case ActivityState.completed:
         icon = Icons.check_circle;
@@ -494,6 +494,7 @@ class ActivityControlsWidget extends StatelessWidget {
     IconData icon;
     VoidCallback? onPressed;
     Color color;
+    final bool isOutline = state == ActivityState.paused;
 
     switch (state) {
       case ActivityState.idle:
@@ -506,7 +507,7 @@ class ActivityControlsWidget extends StatelessWidget {
         text = 'Pause';
         icon = Icons.pause;
         onPressed = onPause;
-        color = GlobalTheme.primaryAccent;
+        color = GlobalTheme.statusSuccess;
         break;
       case ActivityState.paused:
         text = 'Resume';
@@ -538,9 +539,14 @@ class ActivityControlsWidget extends StatelessWidget {
               curve: Curves.easeInOutCubic,
               padding: EdgeInsets.symmetric(vertical: isLoading ? 18 : 16),
               decoration: BoxDecoration(
-                color: isLoading ? color.withOpacity(0.7) : color,
+                color: isOutline 
+                    ? Colors.transparent 
+                    : (isLoading ? color.withOpacity(0.7) : color),
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: [
+                border: isOutline 
+                    ? Border.all(color: color, width: 2) 
+                    : null,
+                boxShadow: isOutline ? null : [
                   BoxShadow(
                     color: color.withOpacity(isLoading ? 0.2 : 0.3),
                     blurRadius: isLoading ? 8 : 12,
@@ -557,8 +563,8 @@ class ActivityControlsWidget extends StatelessWidget {
                       height: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2.5,
-                        valueColor: const AlwaysStoppedAnimation<Color>(
-                          Colors.white,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          isOutline ? color : Colors.white,
                         ),
                       ),
                     ).animate().scale(
@@ -566,21 +572,25 @@ class ActivityControlsWidget extends StatelessWidget {
                       curve: Curves.elasticOut,
                     )
                   else
-                    Icon(icon, color: Colors.white, size: 20)
+                    Icon(
+                      icon, 
+                      color: isOutline ? color : Colors.white, 
+                      size: 20,
+                    )
                         .animate()
                         .scale(duration: 200.ms)
                         .then()
                         .shimmer(
                           duration: 1500.ms,
-                          color: Colors.white.withOpacity(0.4),
+                          color: (isOutline ? color : Colors.white).withOpacity(0.4),
                         ),
 
                   SizedBox(width: isLoading ? 12 : 8),
 
                   Text(
                     isLoading ? 'Processing...' : text,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: isOutline ? color : Colors.white,
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                     ),
