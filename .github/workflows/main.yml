@@ -5,9 +5,26 @@ on:
     branches: [master]
 
 jobs:
+  version:
+    name: Generate Version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.gen.outputs.version }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Generate Version Number
+        id: gen
+        run: |
+          chmod +x .github/scripts/generate_version.sh
+          ./.github/scripts/generate_version.sh
+
   build-android:
     name: Build Android APK
+    needs: version
     runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -32,25 +49,6 @@ jobs:
           path: ~/.pub-cache
           key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
 
-      - name: Generate Version Number
-        id: version
-        run: |
-          YEAR=$(date -u +%Y)
-          YY=$(date -u +%y)
-          DAY_OF_YEAR=$(date -u +%j)
-          HOUR=$(date -u +%H)
-          MIN=$(date -u +%M)
-          SEC=$(date -u +%S)
-          MAJOR=$((YY - 25))
-          DAY_ZERO_INDEXED=$((10#$DAY_OF_YEAR - 1))
-          SECONDS_ELAPSED=$((DAY_ZERO_INDEXED * 86400 + 10#$HOUR * 3600 + 10#$MIN * 60 + 10#$SEC))
-          SECONDS_IN_YEAR=31536000
-          MINOR=$(python3 -c "pct=${SECONDS_ELAPSED}/${SECONDS_IN_YEAR}; print(f'{int(pct*1000000):06d}')")
-          VERSION="${MAJOR}.${MINOR}"
-          echo "Generated version: ${VERSION}"
-          echo "VERSION=${VERSION}" >> $GITHUB_ENV
-          echo "version=${VERSION}" >> $GITHUB_OUTPUT
-
       - name: Install dependencies
         run: flutter pub get
 
@@ -70,8 +68,10 @@ jobs:
 
   build-ios:
     name: Build iOS App
+    needs: [version, build-android]
     runs-on: macos-latest
-    needs: build-android
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -83,25 +83,6 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Generate Version Number
-        id: version
-        run: |
-          YEAR=$(date -u +%Y)
-          YY=$(date -u +%y)
-          DAY_OF_YEAR=$(date -u +%j)
-          HOUR=$(date -u +%H)
-          MIN=$(date -u +%M)
-          SEC=$(date -u +%S)
-          MAJOR=$((YY - 25))
-          DAY_ZERO_INDEXED=$((10#$DAY_OF_YEAR - 1))
-          SECONDS_ELAPSED=$((DAY_ZERO_INDEXED * 86400 + 10#$HOUR * 3600 + 10#$MIN * 60 + 10#$SEC))
-          SECONDS_IN_YEAR=31536000
-          MINOR=$(python3 -c "pct=${SECONDS_ELAPSED}/${SECONDS_IN_YEAR}; print(f'{int(pct*1000000):06d}')")
-          VERSION="${MAJOR}.${MINOR}"
-          echo "Generated version: ${VERSION}"
-          echo "VERSION=${VERSION}" >> $GITHUB_ENV
-          echo "version=${VERSION}" >> $GITHUB_OUTPUT
-
       - name: Install dependencies
         run: flutter pub get
 
@@ -112,13 +93,13 @@ jobs:
         run: |
           cd build/ios/iphoneos
           # Find the .app directory (should be Runner.app or similar)
-          APP_DIR=$(find . -maxdepth 1 -name "*.app" -type d | head -1)
+          APP_DIR=$(basename $(find . -maxdepth 1 -name "*.app" -type d | head -1))
           if [ -n "$APP_DIR" ]; then
             mv "$APP_DIR" "ios-app-${{ env.VERSION }}.app"
           fi
 
-      - name: Upload IPA
+      - name: Upload iOS App
         uses: actions/upload-artifact@v4
         with:
-          name: ios-app-${{ env.VERSION }}
+          name: ios-app-${{ env.VERSION }}.app
           path: build/ios/iphoneos/ios-app-${{ env.VERSION }}.app

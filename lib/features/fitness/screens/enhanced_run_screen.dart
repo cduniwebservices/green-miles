@@ -837,7 +837,19 @@ class StatsDisplay extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final goalState = ref.watch(goalProvider);
-    final selectedGoal = goalState.selectedGoal ?? sampleGoals.first;
+    
+    // Provide a fallback goal if none is selected
+    final selectedGoal = goalState.selectedGoal ?? (goalState.goals.isNotEmpty ? goalState.goals.first : const Goal(
+      id: 'default',
+      type: GoalType.petrolDieselCar,
+      title: 'Default',
+      description: 'Default goal',
+      level: GoalLevel.easy,
+      duration: Duration(minutes: 30),
+      carbonOffsetPotential: 'Medium',
+      co2PerKm: 0.171,
+      icon: Icons.directions_car,
+    ));
     
     // Calculate CO2 saved
     final distanceKm = stats.totalDistanceMeters / 1000.0;

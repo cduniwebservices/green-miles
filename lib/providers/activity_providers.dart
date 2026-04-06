@@ -195,63 +195,16 @@ class ActivityActions {
   ActivityType get activityType => _controller.activityType;
 }
 
-/// Provider for run history (mock data for now)
+/// Provider for run history (fetches from local storage)
 final runHistoryProvider = FutureProvider<List<ActivitySession>>((ref) async {
-  // Return mock completed sessions for demonstration
-  // In a real app, this would fetch from local storage or API
-  await Future.delayed(const Duration(milliseconds: 500)); // Simulate loading
+  // Return all activities from local storage
+  // In a real app, this might include sorting and filtering
+  await Future.delayed(const Duration(milliseconds: 300)); // Brief delay for UX
 
-  return [
-    ActivitySession(
-      id: '1',
-      activityType: ActivityType.running,
-      state: ActivityState.completed,
-      stats: FitnessStats(
-        totalDistanceMeters: 5200,
-        totalDuration: const Duration(minutes: 28, seconds: 15),
-        activeDuration: const Duration(minutes: 26, seconds: 42),
-        averageSpeedMps: 3.1,
-        estimatedCalories: 312,
-        startTime: DateTime.now().subtract(const Duration(days: 2)),
-        endTime: DateTime.now().subtract(const Duration(days: 2, hours: -1)),
-        averagePaceSecondsPerKm: 324, // 5:24 min/km
-        totalSteps: 6240,
-        elevationGain: 48.0,
-      ),
-    ),
-    ActivitySession(
-      id: '2',
-      activityType: ActivityType.walking,
-      state: ActivityState.completed,
-      stats: FitnessStats(
-        totalDistanceMeters: 3800,
-        totalDuration: const Duration(minutes: 42, seconds: 8),
-        activeDuration: const Duration(minutes: 40, seconds: 30),
-        averageSpeedMps: 1.5,
-        estimatedCalories: 156,
-        startTime: DateTime.now().subtract(const Duration(days: 5)),
-        endTime: DateTime.now().subtract(const Duration(days: 5, hours: -1)),
-        averagePaceSecondsPerKm: 662, // 11:02 min/km
-        totalSteps: 4560,
-        elevationGain: 22.0,
-      ),
-    ),
-    ActivitySession(
-      id: '3',
-      activityType: ActivityType.running,
-      state: ActivityState.completed,
-      stats: FitnessStats(
-        totalDistanceMeters: 10100,
-        totalDuration: const Duration(minutes: 52, seconds: 34),
-        activeDuration: const Duration(minutes: 48, seconds: 12),
-        averageSpeedMps: 3.5,
-        estimatedCalories: 624,
-        startTime: DateTime.now().subtract(const Duration(days: 8)),
-        endTime: DateTime.now().subtract(const Duration(days: 8, hours: -1)),
-        averagePaceSecondsPerKm: 286, // 4:46 min/km
-        totalSteps: 12120,
-        elevationGain: 95.0,
-      ),
-    ),
-  ];
+  final activities = LocalStorageService.getAllActivities();
+  
+  // Sort by start time descending (newest first)
+  activities.sort((a, b) => b.stats.startTime.compareTo(a.stats.startTime));
+  
+  return activities;
 });

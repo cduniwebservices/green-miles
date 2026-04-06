@@ -28,6 +28,11 @@ class NavigationService {
     context.push('/session-summary', extra: session);
   }
 
+  /// Navigate to detailed activity history with session data
+  static void goToActivityDetail(BuildContext context, dynamic session) {
+    context.push('/activity-detail', extra: session);
+  }
+
   /// Navigate back with haptic feedback
   /// For GoRouter, use navigate to specific routes instead of pop
   static void goBack(BuildContext context, {String? fallbackRoute}) {

@@ -26,7 +26,7 @@ class GoalState {
 }
 
 class GoalNotifier extends StateNotifier<GoalState> {
-  GoalNotifier() : super(GoalState(goals: sampleGoals));
+  GoalNotifier() : super(GoalState(goals: defaultGoals));
 
   void selectGoal(Goal goal) {
     final updatedGoals = state.goals

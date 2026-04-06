@@ -17,6 +17,7 @@ import 'features/goals/goals_screen.dart';
 import 'features/fitness/screens/enhanced_run_screen.dart';
 import 'features/fitness/screens/session_summary_screen.dart';
 import 'features/fitness/screens/history_screen.dart';
+import 'features/fitness/screens/activity_detail_screen.dart';
 import 'features/fitness/screens/permission_denied_screen.dart';
 import 'features/onboarding/permission_onboarding.dart';
 import 'features/debug/debug_screen.dart';
@@ -172,6 +173,29 @@ final GoRouter _router = GoRouter(
         key: state.pageKey,
         child: const HistoryScreen(),
       ),
+    ),
+
+    GoRoute(
+      path: '/activity-detail',
+      name: 'activity-detail',
+      pageBuilder: (context, state) {
+        final session = state.extra as ActivitySession?;
+        if (session == null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            context.go('/history');
+          });
+          return _buildPageWithTransition(
+            key: state.pageKey,
+            child: const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            ),
+          );
+        }
+        return _buildPageWithTransition(
+          key: state.pageKey,
+          child: ActivityDetailScreen(session: session),
+        );
+      },
     ),
 
     // Permission flow

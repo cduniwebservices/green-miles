@@ -698,70 +698,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
   }
 
   void _showRunDetails(ActivitySession run) {
-    // Navigate to detailed run view
-    // This would typically navigate to a detailed screen
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.8,
-        minChildSize: 0.5,
-        maxChildSize: 0.95,
-        builder: (context, scrollController) => Container(
-          decoration: BoxDecoration(
-            gradient: GlobalTheme.backgroundGradient,
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(GlobalTheme.radiusXLarge),
-            ),
-          ),
-          child: Column(
-            children: [
-              // Handle bar
-              Container(
-                margin: const EdgeInsets.only(top: GlobalTheme.spacing12),
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: GlobalTheme.surfaceBorder,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-
-              // Content
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(GlobalTheme.spacing24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Run Details',
-                        style: Theme.of(context).textTheme.headlineMedium
-                            ?.copyWith(
-                              color: GlobalTheme.textPrimary,
-                              fontWeight: FontWeight.w700,
-                            ),
-                      ),
-
-                      const SizedBox(height: GlobalTheme.spacing24),
-
-                      // More detailed stats would go here
-                      Text(
-                        'Detailed analytics and route map would be shown here.',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: GlobalTheme.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+    NavigationService.goToActivityDetail(context, run);
   }
 }
 

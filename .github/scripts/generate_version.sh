@@ -11,11 +11,12 @@ MIN=$(date -u +%M)
 SEC=$(date -u +%S)
 
 # Calculate major version (YY - 25)
-MAJOR=$((YY - 25))
+MAJOR=$((10#$YY - 25))
 
 # Calculate seconds elapsed since start of year
-DAY_ZERO_INDEXED=$((DAY_OF_YEAR - 1))
-SECONDS_ELAPSED=$((DAY_ZERO_INDEXED * 86400 + HOUR * 3600 + MIN * 60 + SEC))
+# Using 10# prefix to prevent octal interpretation of leading zeros
+DAY_ZERO_INDEXED=$((10#$DAY_OF_YEAR - 1))
+SECONDS_ELAPSED=$((DAY_ZERO_INDEXED * 86400 + 10#$HOUR * 3600 + 10#$MIN * 60 + 10#$SEC))
 
 # Seconds in a standard year (365 days)
 SECONDS_IN_YEAR=31536000
@@ -34,5 +35,9 @@ print(f'{minor:06d}')
 VERSION="${MAJOR}.${MINOR}"
 
 echo "Generated version: ${VERSION}"
-echo "VERSION=${VERSION}" >> "${GITHUB_ENV}"
-echo "version=${VERSION}" >> "${GITHUB_OUTPUT}"
+if [ -n "$GITHUB_ENV" ]; then
+  echo "VERSION=${VERSION}" >> "${GITHUB_ENV}"
+fi
+if [ -n "$GITHUB_OUTPUT" ]; then
+  echo "version=${VERSION}" >> "${GITHUB_OUTPUT}"
+fi
