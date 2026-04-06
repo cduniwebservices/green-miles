@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 import '../models/fitness_models.dart';
 import '../services/activity_controller.dart';
+import '../services/local_storage_service.dart';
 
 /// Provider for the activity controller singleton
 final activityControllerProvider = Provider<ActivityController>((ref) {
