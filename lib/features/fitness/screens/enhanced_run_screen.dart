@@ -91,7 +91,13 @@ class _EnhancedRunScreenState extends ConsumerState<EnhancedRunScreen>
                 // PERFORMANCE FIX: Simple loading indicator
                 CircularProgressIndicator(color: theme.primaryColor),
                 SizedBox(height: mediaQuery.size.height * 0.02),
-                Text('Initializing GPS...', style: theme.textTheme.titleMedium),
+                Text(
+                  'Initialising GPS...',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
               ],
             ),
           ),
@@ -557,9 +563,9 @@ class _EnhancedRunScreenState extends ConsumerState<EnhancedRunScreen>
       case ActivityState.idle:
         return theme.colorScheme.onSurface.withOpacity(0.7);
       case ActivityState.running:
-        return theme.primaryColor;
+        return GlobalTheme.primaryAccent; // Green
       case ActivityState.paused:
-        return GlobalTheme.statusSuccess;
+        return GlobalTheme.statusWarning; // Orange/Amber
       case ActivityState.completed:
         return Colors.green;
     }
@@ -717,70 +723,76 @@ class _EnhancedRunScreenState extends ConsumerState<EnhancedRunScreen>
           context: context,
           barrierDismissible: false,
           builder: (context) => AlertDialog(
-            backgroundColor: Theme.of(context).cardColor,
+            backgroundColor: const Color(0xFF1A1A1A),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(24),
+              side: BorderSide(color: Colors.white.withOpacity(0.1)),
             ),
-            title: Row(
-              children: [
-                Icon(
-                  Icons.pause_circle_outline,
-                  color: Theme.of(context).primaryColor,
-                  size: 28,
-                ),
-                const SizedBox(width: 12),
-                const Expanded(child: Text('Stop Activity?')),
-              ],
+            titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+            contentPadding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+            title: Text(
+              'STOP ACTIVITY?',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1.2,
+                  ),
             ),
             content: const Text(
               'Are you sure you want to stop and save this activity? Your progress will be saved.',
-              style: TextStyle(height: 1.5),
+              style: TextStyle(color: GlobalTheme.textSecondary, height: 1.5),
             ),
+            actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
             actions: [
-              TextButton(
-                onPressed: () async {
-                  await HapticService.fitnessHaptic('light');
-                  Navigator.of(context).pop(false);
-                },
-                style: TextButton.styleFrom(
-                  foregroundColor: Theme.of(
-                    context,
-                  ).colorScheme.onSurface.withOpacity(0.7),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () async {
+                        await HapticService.fitnessHaptic('light');
+                        Navigator.of(context).pop(false);
+                      },
+                      icon: const Icon(Icons.close_rounded, size: 18),
+                      label: const Text('CANCEL'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: GlobalTheme.primaryNeon,
+                        side: const BorderSide(color: GlobalTheme.primaryNeon, width: 1.5),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        textStyle: const TextStyle(
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 1.1,
+                        ),
+                      ),
+                    ),
                   ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () async {
+                        await HapticService.fitnessHaptic('light');
+                        Navigator.of(context).pop(true);
+                      },
+                      icon: const Icon(Icons.check_circle_rounded, size: 18),
+                      label: const Text('STOP & SAVE'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: GlobalTheme.primaryNeon,
+                        foregroundColor: Colors.black,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        textStyle: const TextStyle(
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 1.1,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-                child: const Text(
-                  'Cancel',
-                  style: TextStyle(fontWeight: FontWeight.w600),
-                ),
-              ),
-              const SizedBox(width: 8),
-              FilledButton.icon(
-                onPressed: () async {
-                  await HapticService.fitnessHaptic('light');
-                  Navigator.of(context).pop(true);
-                },
-                icon: const Icon(Icons.stop, size: 18),
-                label: const Text(
-                  'Stop & Save',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                style: FilledButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.error,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 12,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
+                ],
               ),
             ],
           ),

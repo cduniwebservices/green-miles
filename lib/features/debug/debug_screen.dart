@@ -535,7 +535,7 @@ class _DebugScreenState extends ConsumerState<DebugScreen>
           ),
           const SizedBox(height: 8),
           const Text(
-            'Creates a realistic walking/running route and sends it to Supabase for testing.',
+            'Creates a realistic walking/activity route and sends it to Supabase for testing.',
             style: TextStyle(color: Colors.grey),
           ),
           const SizedBox(height: 24),
@@ -550,7 +550,7 @@ class _DebugScreenState extends ConsumerState<DebugScreen>
 
           _buildMockRouteButton(
             icon: Icons.directions_run,
-            label: 'Generate Run Route (5km)',
+            label: 'Generate Activity Route (5km)',
             color: Colors.green,
             onTap: () => _generateMockRoute('running', 5000),
           ),

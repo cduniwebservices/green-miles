@@ -48,7 +48,7 @@ class _PermissionOnboardingFlowState extends State<PermissionOnboardingFlow>
       title: 'Location Tracking',
       subtitle: 'Accurate GPS for precise tracking',
       description:
-          'We use GPS to track your running routes, calculate distance, pace, and provide detailed workout analytics.',
+          'We use GPS to track your activity routes, calculate distance, pace, and provide detailed workout analytics.',
       icon: Icons.location_on,
       color: GlobalTheme.primaryAction,
     ),

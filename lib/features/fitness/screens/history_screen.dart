@@ -47,7 +47,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final activityHistory = ref.watch(runHistoryProvider);
+    final activityHistory = ref.watch(activityHistoryProvider);
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -81,15 +81,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
               ),
             ],
           ),
-        ),
-      ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 20, right: 10),
-        child: AppButton.primary(
-          text: 'New Activity',
-          onPressed: () {
-             NavigationService.goToRun(context);
-          },
         ),
       ),
     );
@@ -174,7 +165,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
                   builder: (context, ref, child) {
                     final totalActivities = ref.watch(totalActivitiesProvider);
                     return Text(
-                      '$totalActivities activities',
+                      '$totalActivities ${totalActivities == 1 ? 'activity' : 'activities'}',
                       style: theme.textTheme.labelMedium?.copyWith(
                         color: Colors.black,
                         fontWeight: FontWeight.w700,
@@ -317,7 +308,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                _formatActivityType(activity.activityType),
+                                _getActivityTitle(activity),
                                 style: theme.textTheme.titleMedium?.copyWith(
                                   color: GlobalTheme.textPrimary,
                                   fontWeight: FontWeight.w600,
@@ -589,7 +580,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
             OutlinedButton.icon(
               onPressed: () {
                 // Refresh the data
-                final _ = ref.refresh(runHistoryProvider);
+                final _ = ref.refresh(activityHistoryProvider);
               },
               icon: const Icon(Icons.refresh_rounded),
               label: const Text('Try Again'),
@@ -603,22 +594,27 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
   // Helper methods
   List<ActivitySession> _filterActivities(List<ActivitySession> activities) {
     final now = DateTime.now();
+    final todayStart = DateTime(now.year, now.month, now.day);
 
     switch (_selectedFilter) {
       case 'This Week':
-        final weekStart = now.subtract(Duration(days: now.weekday - 1));
+        // Get the start of the current week (Monday)
+        final weekStart = todayStart.subtract(Duration(days: now.weekday - 1));
         return activities
-            .where((activity) => activity.stats.startTime.isAfter(weekStart))
+            .where((activity) => activity.stats.startTime.isAfter(weekStart) || 
+                                activity.stats.startTime.isAtSameMomentAs(weekStart))
             .toList();
       case 'This Month':
         final monthStart = DateTime(now.year, now.month, 1);
         return activities
-            .where((activity) => activity.stats.startTime.isAfter(monthStart))
+            .where((activity) => activity.stats.startTime.isAfter(monthStart) || 
+                                activity.stats.startTime.isAtSameMomentAs(monthStart))
             .toList();
       case 'This Year':
         final yearStart = DateTime(now.year, 1, 1);
         return activities
-            .where((activity) => activity.stats.startTime.isAfter(yearStart))
+            .where((activity) => activity.stats.startTime.isAfter(yearStart) || 
+                                activity.stats.startTime.isAtSameMomentAs(yearStart))
             .toList();
       default:
         return activities;
@@ -651,17 +647,43 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
     }
   }
 
-  String _formatActivityType(ActivityType type) {
-    switch (type) {
-      case ActivityType.running:
-        return 'Morning Activity';
-      case ActivityType.walking:
-        return 'Walking';
-      case ActivityType.cycling:
-        return 'Cycling';
-      case ActivityType.hiking:
-        return 'Hiking';
+  String _getActivityTitle(ActivitySession activity) {
+    final stats = activity.stats;
+    final speedKmh = stats.averageSpeedMps * 3.6;
+    
+    // Determine activity word based on speed
+    String typeWord;
+    if (speedKmh < 6.0) {
+      typeWord = 'Walk';
+    } else if (speedKmh < 20.0) {
+      typeWord = 'Run';
+    } else {
+      typeWord = 'Ride';
     }
+
+    final date = stats.startTime;
+    final dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    final monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    
+    final dayName = dayNames[date.weekday - 1];
+    final monthName = monthNames[date.month - 1];
+    final dayNum = date.day;
+    
+    // Ordinal suffix
+    String suffix = 'th';
+    if (dayNum % 10 == 1 && dayNum % 100 != 11) suffix = 'st';
+    else if (dayNum % 10 == 2 && dayNum % 100 != 12) suffix = 'nd';
+    else if (dayNum % 10 == 3 && dayNum % 100 != 13) suffix = 'rd';
+    
+    final year = date.year;
+    final time = '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+    
+    return '$dayName $dayNum$suffix $monthName $year - $time $typeWord';
+  }
+
+  String _formatActivityType(ActivityType type) {
+    // This method is now replaced by _getActivityTitle but kept for internal logic if needed
+    return type.displayName;
   }
 
   String _formatDate(DateTime date) {
@@ -703,7 +725,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
 
 // Provider for total activities count
 final totalActivitiesProvider = Provider<int>((ref) {
-  final history = ref.watch(runHistoryProvider);
+  final history = ref.watch(activityHistoryProvider);
   return history.when(
     data: (activities) => activities.length,
     loading: () => 0,

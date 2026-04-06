@@ -196,8 +196,8 @@ class ActivityActions {
   ActivityType get activityType => _controller.activityType;
 }
 
-/// Provider for run history (fetches from local storage)
-final runHistoryProvider = FutureProvider<List<ActivitySession>>((ref) async {
+/// Provider for activity history (fetches from local storage)
+final activityHistoryProvider = FutureProvider<List<ActivitySession>>((ref) async {
   // Return all activities from local storage
   // In a real app, this might include sorting and filtering
   await Future.delayed(const Duration(milliseconds: 300)); // Brief delay for UX

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../components/app_button.dart';
 import '../../theme/global_theme.dart';
 import '../../services/version_service.dart';
@@ -15,157 +16,153 @@ class WelcomeScreen extends StatefulWidget {
 
 class _WelcomeScreenState extends State<WelcomeScreen>
     with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-
+  
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 600),
-      vsync: this,
-    );
-    // Start animation after frame is built
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _controller.forward();
-    });
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Container(
-        decoration: const BoxDecoration(gradient: GlobalTheme.backgroundGradient),
+        decoration: const BoxDecoration(
+          gradient: GlobalTheme.backgroundGradient,
+        ),
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Column(
-              children: [
-                const SizedBox(height: 40),
-
-                // App logo/branding
-                TweenAnimationBuilder<double>(
-                  duration: const Duration(milliseconds: 500),
-                  tween: Tween<double>(begin: 0.0, end: 1.0),
-                  curve: Curves.easeOut,
-                  builder: (context, value, child) {
-                    return Opacity(
-                      opacity: value,
-                      child: Transform.translate(
-                        offset: Offset(0, 20 * (1 - value)),
-                        child: child,
-                      ),
-                    );
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: GlobalTheme.surfaceCard,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      'HEALTHY HUMANS, HEALTHY PLANET',
-                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: GlobalTheme.textSecondary,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 1.2,
-                      ),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 60),
-
-                // Hero image placeholder
-                Expanded(
-                  flex: 2,
-                  child: TweenAnimationBuilder<double>(
-                    duration: const Duration(milliseconds: 600),
-                    tween: Tween<double>(begin: 0.0, end: 1.0),
-                    curve: Curves.easeOut,
-                    builder: (context, value, child) {
-                      return Opacity(
-                        opacity: value,
-                        child: Transform.scale(
-                          scale: 0.8 + (0.2 * value),
-                          child: child,
+          child: Stack(
+            children: [
+              // Main Content
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 20),
+                    // Header badge
+                    Center(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 10,
                         ),
-                      );
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(24),
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            GlobalTheme.primaryNeon.withOpacity(0.2),
-                            GlobalTheme.primaryAccent.withOpacity(0.2),
-                          ],
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.05),
+                          borderRadius: BorderRadius.circular(30),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.1),
+                          ),
+                        ),
+                        child: Text(
+                          'HEALTHY HUMANS, HEALTHY PLANET',
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: GlobalTheme.textSecondary,
+                            letterSpacing: 1.5,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                      child: Center(
-                        child: SvgPicture.asset(
-                          'assets/icons/icon-logo-4-color.svg',
-                          fit: BoxFit.contain,
-                          width: MediaQuery.of(context).size.width * 0.75,
+                    ).animate().fadeIn(duration: 600.ms).slideY(begin: -0.2, end: 0),
+
+                    const Spacer(flex: 2),
+
+                    // Main Illustration
+                    Center(
+                      child: Hero(
+                        tag: 'app_logo',
+                        child: Container(
+                          height: 320,
+                          width: 320,
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [Color(0xFF1A331A), Color(0xFF0F1A0F)],
+                            ),
+                            borderRadius: BorderRadius.circular(40),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF42FF9E).withOpacity(0.1),
+                                blurRadius: 40,
+                                spreadRadius: 5,
+                              ),
+                            ],
+                          ),
+                          child: SvgPicture.asset(
+                            'assets/icons/icon-logo-4-color.svg',
+                            fit: BoxFit.contain,
+                          ),
                         ),
                       ),
-                    ),
-                  ),
-                ),
+                    ).animate().scale(duration: 800.ms, curve: Curves.easeOutBack),
 
-                const SizedBox(height: 60),
+                    const Spacer(flex: 3),
 
-                // Main title
-                TweenAnimationBuilder<double>(
-                  duration: const Duration(milliseconds: 700),
-                  tween: Tween<double>(begin: 0.0, end: 1.0),
-                  curve: Curves.easeOut,
-                  builder: (context, value, child) {
-                    return Opacity(
-                      opacity: value.clamp(0.0, 1.0),
-                      child: Transform.translate(
-                        offset: Offset(0, 50 * (1 - value)),
-                        child: child,
+                    // App Title
+                    Text(
+                      'CALORIES',
+                      style: theme.textTheme.displayLarge?.copyWith(
+                        fontWeight: FontWeight.w900,
+                        height: 1.0,
+                        color: GlobalTheme.textPrimary,
                       ),
-                    );
-                  },
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'CALORIES NOT',
-                  style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                    fontWeight: FontWeight.w900,
-                    height: 1.0,
-                    color: GlobalTheme.textPrimary,
-                  ),
-                ),
-                Text(
-                  'CARBON',
-                  style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                    fontWeight: FontWeight.w900,
-                    height: 1.0,
-                    color: GlobalTheme.primaryNeon,
-                  ),
-                ),
-              ],
-            ),
-                ),
+                    ).animate().fadeIn(delay: 400.ms).slideX(begin: -0.2, end: 0),
+                    Text(
+                      'NOT',
+                      style: theme.textTheme.displayLarge?.copyWith(
+                        fontWeight: FontWeight.w900,
+                        height: 1.0,
+                        color: GlobalTheme.textPrimary,
+                      ),
+                    ).animate().fadeIn(delay: 600.ms).slideX(begin: -0.2, end: 0),
+                    
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'CARBON',
+                            style: theme.textTheme.displayLarge?.copyWith(
+                              fontWeight: FontWeight.w900,
+                              height: 1.0,
+                              color: GlobalTheme.primaryNeon,
+                            ),
+                          ).animate().fadeIn(delay: 800.ms).slideX(begin: -0.2, end: 0),
+                        ),
+                        
+                        // Version number - repositioned to right side above button area
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8.0),
+                          child: Opacity(
+                            opacity: 0.4,
+                            child: Text(
+                              VersionService.displayVersion,
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: GlobalTheme.textTertiary,
+                                fontSize: 10,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ),
+                        ).animate().fadeIn(delay: 1000.ms),
+                      ],
+                    ),
 
-                const SizedBox(height: 40),
+                    const SizedBox(height: 120), // Padding for the fixed button
+                  ],
+                ),
+              ),
 
-                // Get started button
-                TweenAnimationBuilder<double>(
+              // Fixed Bottom Button - matching tracking screen position
+              Positioned(
+                bottom: 24,
+                left: 16,
+                right: 16,
+                child: TweenAnimationBuilder<double>(
                   duration: const Duration(milliseconds: 900),
                   tween: Tween<double>(begin: 0.0, end: 1.0),
                   curve: Curves.easeOut,
@@ -185,30 +182,13 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     onPressed: () async {
                       await HapticFeedback.mediumImpact();
                       if (mounted) {
-                        context.go('/goals');
+                        context.go('/run'); // Default flow to run screen
                       }
                     },
                   ),
                 ),
-
-                const Spacer(),
-
-                // Version number - subtle, bottom-centered
-                Opacity(
-                  opacity: 0.5,
-                  child: Text(
-                    VersionService.displayVersion,
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: GlobalTheme.textTertiary,
-                          fontSize: 10,
-                          letterSpacing: 0.8,
-                        ),
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

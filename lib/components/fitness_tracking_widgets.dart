@@ -348,7 +348,7 @@ class _ActivityControlsWidgetState extends State<ActivityControlsWidget>
     super.initState();
     _stopLongPressController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 2),
+      duration: const Duration(milliseconds: 1200), // Sped up from 2s
     );
     _stopLongPressController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
@@ -425,9 +425,9 @@ class _ActivityControlsWidgetState extends State<ActivityControlsWidget>
       ),
       child: Row(
         children: [
-          // Hold to Stop Button
+          // Hold to Stop Button - flex reduced to give space
           Expanded(
-            flex: 3,
+            flex: 2, 
             child: GestureDetector(
               onLongPressStart: (_) {
                 setState(() => _isLongPressing = true);
@@ -453,14 +453,14 @@ class _ActivityControlsWidgetState extends State<ActivityControlsWidget>
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const Icon(Icons.stop_rounded, color: Colors.black, size: 20),
-                          const SizedBox(width: 10),
+                          const SizedBox(width: 8),
                           Text(
                             'HOLD TO STOP',
                             style: theme.textTheme.titleMedium?.copyWith(
                               color: Colors.black,
                               fontWeight: FontWeight.w800,
-                              fontSize: 16,
-                              letterSpacing: 1.2,
+                              fontSize: 14, // Slightly smaller to fit narrower button
+                              letterSpacing: 1.0,
                             ),
                           ),
                         ],
@@ -488,7 +488,7 @@ class _ActivityControlsWidgetState extends State<ActivityControlsWidget>
             ),
           ),
           const SizedBox(width: 12),
-          // Pause/Resume Button
+          // Pause/Resume Button - flex increased for breathing space
           Expanded(
             flex: 1,
             child: InkWell(

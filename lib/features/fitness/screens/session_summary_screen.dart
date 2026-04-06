@@ -221,7 +221,7 @@ class _SessionSummaryScreenState extends ConsumerState<SessionSummaryScreen>
             final goalState = ref.watch(goalProvider);
             final selectedGoal = goalState.selectedGoal;
 
-            String subTitle = 'Great job on completing your ${widget.session.activityType.displayName.toLowerCase()}!';
+            String subTitle = 'Well done, the planet thanks you!';
 
             if (selectedGoal != null) {
               final distanceKm = widget.session.stats.totalDistanceMeters / 1000;

@@ -95,11 +95,15 @@ jobs:
           # Find the .app directory (should be Runner.app or similar)
           APP_DIR=$(basename $(find . -maxdepth 1 -name "*.app" -type d | head -1))
           if [ -n "$APP_DIR" ]; then
-            mv "$APP_DIR" "ios-app-${{ env.VERSION }}.app"
+            NEW_NAME="ios-app-${{ env.VERSION }}.app"
+            mv "$APP_DIR" "$NEW_NAME"
+            # Create a staging directory so the .app itself is at the root of the zip
+            mkdir -p artifact
+            cp -r "$NEW_NAME" artifact/
           fi
 
       - name: Upload iOS App
         uses: actions/upload-artifact@v4
         with:
           name: ios-app-${{ env.VERSION }}
-          path: build/ios/iphoneos/ios-app-${{ env.VERSION }}.app
+          path: build/ios/iphoneos/artifact/

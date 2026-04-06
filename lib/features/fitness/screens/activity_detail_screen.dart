@@ -9,6 +9,7 @@ import '../../../theme/global_theme.dart';
 import '../../../models/fitness_models.dart';
 import '../../../components/app_button.dart';
 import '../../../services/navigation_service.dart';
+import 'enhanced_run_screen.dart';
 
 /// Detailed activity history screen with replay functionality
 class ActivityDetailScreen extends ConsumerStatefulWidget {
@@ -148,9 +149,7 @@ class _ActivityDetailScreenState extends ConsumerState<ActivityDetailScreen> {
                         text: 'View Full Stats',
                         width: double.infinity,
                         icon: Icons.analytics_outlined,
-                        onPressed: () {
-                          // View full stats logic
-                        },
+                        onPressed: () => _showFullStats(context),
                       ),
                       
                       const SizedBox(height: 40),
@@ -165,34 +164,130 @@ class _ActivityDetailScreenState extends ConsumerState<ActivityDetailScreen> {
     );
   }
 
+  void _showFullStats(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.9,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        builder: (context, scrollController) => Container(
+          decoration: BoxDecoration(
+            color: GlobalTheme.backgroundPrimary,
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(24),
+            ),
+            border: Border.all(color: Colors.white.withOpacity(0.1)),
+          ),
+          child: Column(
+            children: [
+              // Handle bar
+              Container(
+                margin: const EdgeInsets.only(top: 12),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              
+              const SizedBox(height: 16),
+              
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'FULL ACTIVITY STATS',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close_rounded, color: Colors.white),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ],
+                ),
+              ),
+              
+              const Divider(color: Colors.white10),
+              
+              Expanded(
+                child: SingleChildScrollView(
+                  controller: scrollController,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                  child: StatsDisplay(
+                    stats: widget.session.stats,
+                    state: ActivityState.completed,
+                    accentColor: GlobalTheme.primaryNeon,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildHeader(ThemeData theme) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(GlobalTheme.spacing16),
       child: Row(
         children: [
-          GestureDetector(
-            onTap: () => Navigator.of(context).pop(),
-            child: Row(
-              children: [
-                const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
-                const SizedBox(width: 8),
-                Text('Back', style: theme.textTheme.titleMedium?.copyWith(color: Colors.white)),
-              ],
+          // Back button - Standardised
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: GlobalTheme.surfaceCard,
+              borderRadius: BorderRadius.circular(GlobalTheme.radiusMedium),
+              boxShadow: GlobalTheme.cardShadow,
             ),
-          ),
-          const Expanded(
-            child: Center(
-              child: Text(
-                'Run Details',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w900,
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(GlobalTheme.radiusMedium),
+                onTap: () => Navigator.of(context).pop(),
+                child: const Icon(
+                  Icons.arrow_back_ios_rounded,
+                  color: GlobalTheme.textPrimary,
+                  size: 20,
                 ),
               ),
             ),
           ),
-          const SizedBox(width: 60), // Balance the back button
+
+          const SizedBox(width: GlobalTheme.spacing16),
+
+          // Title
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Activity Details',
+                  style: theme.textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: GlobalTheme.textPrimary,
+                  ),
+                ),
+                Text(
+                  'Review your session and metrics',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: GlobalTheme.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
