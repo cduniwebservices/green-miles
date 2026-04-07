@@ -15,6 +15,7 @@ import '../../models/fitness_models.dart';
 import '../../services/local_storage_service.dart';
 import '../../services/sync_service.dart';
 import '../../services/activity_controller.dart';
+import '../../services/enterprise_logger.dart';
 import '../../providers/activity_providers.dart';
 import '../../theme/global_theme.dart';
 
@@ -380,7 +381,7 @@ class _DebugScreenState extends ConsumerState<DebugScreen>
           ElevatedButton.icon(
             onPressed: () {
               LocalStorageService.clearAllActivities();
-              _addLog('🗑️ All local activities cleared');
+              EnterpriseLogger().logInfo('Debug', '🗑️ All local activities cleared');
               setState(() {});
             },
             icon: const Icon(Icons.delete_forever, color: Colors.red),
@@ -505,9 +506,9 @@ class _DebugScreenState extends ConsumerState<DebugScreen>
     // Manual sync button
     ElevatedButton.icon(
       onPressed: () async {
-        _addLog('🔄 Manual sync triggered...');
+        EnterpriseLogger().logInfo('Debug', '🔄 Manual sync triggered...');
         await SyncService().manualSync();
-        _addLog('✅ Manual sync complete');
+        EnterpriseLogger().logInfo('Debug', '✅ Manual sync complete');
         setState(() {});
       },
       icon: const Icon(Icons.cloud_upload, color: Colors.purple),
@@ -593,7 +594,7 @@ class _DebugScreenState extends ConsumerState<DebugScreen>
   }
 
   Future<void> _generateMockRoute(String type, int distanceMeters) async {
-    _addLog('🗺️ Generating mock $type route (${distanceMeters}m)...');
+    EnterpriseLogger().logInfo('Debug', '🗺️ Generating mock $type route (${distanceMeters}m)...');
 
     // Generate realistic GPS points around Sydney
     final points = <LatLng>[];
@@ -610,7 +611,7 @@ class _DebugScreenState extends ConsumerState<DebugScreen>
 
     while (totalDistance < distanceMeters) {
       points.add(LatLng(lat, lng));
-      _addLog('📍 Point: ${lat.toStringAsFixed(6)}, ${lng.toStringAsFixed(6)}');
+      EnterpriseLogger().logInfo('Debug', '📍 Point: ${lat.toStringAsFixed(6)}, ${lng.toStringAsFixed(6)}');
 
       // Random direction change (realistic path)
       final angle = random.nextDouble() * 2 * pi;
@@ -655,11 +656,11 @@ class _DebugScreenState extends ConsumerState<DebugScreen>
 
     // Save locally
     await LocalStorageService.saveActivity(session);
-    _addLog('💾 Mock session saved locally: ${session.id}');
-    _addLog('📊 Distance: ${session.stats.formattedDistance}, Duration: ${session.stats.formattedDuration}');
+    EnterpriseLogger().logInfo('Debug', '💾 Mock session saved locally: ${session.id}');
+    EnterpriseLogger().logInfo('Debug', '📊 Distance: ${session.stats.formattedDistance}, Duration: ${session.stats.formattedDuration}');
 
     // Send to Supabase
-    _addLog('☁️ Uploading to Supabase...');
+    EnterpriseLogger().logInfo('Debug', '☁️ Uploading to Supabase...');
     try {
       final supabase = Supabase.instance.client;
       await supabase.from('activities').insert({
@@ -683,9 +684,9 @@ class _DebugScreenState extends ConsumerState<DebugScreen>
       });
 
       await LocalStorageService.markAsSynced(session.id);
-      _addLog('✅ Successfully uploaded to Supabase');
+      EnterpriseLogger().logInfo('Debug', '✅ Successfully uploaded to Supabase');
     } catch (e) {
-      _addLog('❌ Supabase upload failed: $e');
+      EnterpriseLogger().logInfo('Debug', '❌ Supabase upload failed: $e');
     }
 
     setState(() {});
@@ -713,7 +714,7 @@ class _DebugScreenState extends ConsumerState<DebugScreen>
             description: 'Throws a StateError to test crash capture',
             color: Colors.red,
             onTap: () {
-              _addLog('🐛 Throwing test exception...');
+              EnterpriseLogger().logInfo('Debug', '🐛 Throwing test exception...');
               throw StateError('This is a test exception from debug console');
             },
           ),
@@ -725,7 +726,7 @@ class _DebugScreenState extends ConsumerState<DebugScreen>
             color: Colors.orange,
             onTap: () async {
               await Sentry.captureMessage('Debug console test message');
-              _addLog('📨 Sentry message sent');
+              EnterpriseLogger().logInfo('Debug', '📨 Sentry message sent');
             },
           ),
           const SizedBox(height: 12),
@@ -739,7 +740,7 @@ class _DebugScreenState extends ConsumerState<DebugScreen>
                 throw Exception('Simulated database timeout');
               } catch (e, stack) {
                 await Sentry.captureException(e, stackTrace: stack);
-                _addLog('⚠️ Exception captured to Sentry (no crash)');
+                EnterpriseLogger().logInfo('Debug', '⚠️ Exception captured to Sentry (no crash)');
               }
             },
           ),
@@ -758,7 +759,7 @@ class _DebugScreenState extends ConsumerState<DebugScreen>
                 ),
               );
               await Sentry.captureMessage('Breadcrumb test with context', level: SentryLevel.warning);
-              _addLog('🍞 Breadcrumb added and message sent');
+              EnterpriseLogger().logInfo('Debug', '🍞 Breadcrumb added and message sent');
             },
           ),
           const SizedBox(height: 12),
@@ -776,7 +777,7 @@ class _DebugScreenState extends ConsumerState<DebugScreen>
               await Future.delayed(const Duration(milliseconds: 500));
               transaction.status = SpanStatus.ok();
               await transaction.finish();
-              _addLog('📊 Performance transaction completed');
+              EnterpriseLogger().logInfo('Debug', '📊 Performance transaction completed');
             },
           ),
         ],

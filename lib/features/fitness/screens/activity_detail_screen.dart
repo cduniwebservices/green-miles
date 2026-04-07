@@ -9,6 +9,7 @@ import '../../../theme/global_theme.dart';
 import '../../../models/fitness_models.dart';
 import '../../../components/app_button.dart';
 import '../../../services/navigation_service.dart';
+import '../../../services/enterprise_logger.dart';
 import 'enhanced_run_screen.dart';
 
 /// Detailed activity history screen with replay functionality
