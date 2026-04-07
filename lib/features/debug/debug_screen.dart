@@ -659,6 +659,9 @@ class _DebugScreenState extends ConsumerState<DebugScreen>
     EnterpriseLogger().logInfo('Debug', '💾 Mock session saved locally: ${session.id}');
     EnterpriseLogger().logInfo('Debug', '📊 Distance: ${session.stats.formattedDistance}, Duration: ${session.stats.formattedDuration}');
 
+    // Invalidate history provider so it refreshes when opened
+    ref.invalidate(activityHistoryProvider);
+
     // Send to Supabase
     EnterpriseLogger().logInfo('Debug', '☁️ Uploading to Supabase...');
     try {

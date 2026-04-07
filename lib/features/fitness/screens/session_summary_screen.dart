@@ -694,7 +694,10 @@ class _SessionSummaryScreenState extends ConsumerState<SessionSummaryScreen>
 
   void _saveAndContinue() async {
     // Save the session to history
-    // In a real app, this would save to a database or local storage
+    // ActivityController.stopActivity() already saved it to LocalStorageService
+    
+    // Invalidate history provider to ensure it reloads
+    ref.invalidate(activityHistoryProvider);
 
     // Reset the activity controller so users can start a new activity
     ref.read(activityControllerProvider).resetActivity();
