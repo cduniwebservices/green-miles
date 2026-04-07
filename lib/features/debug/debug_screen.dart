@@ -59,7 +59,6 @@ class DebugScreen extends ConsumerStatefulWidget {
 class _DebugScreenState extends ConsumerState<DebugScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  final List<String> _logs = [];
   final ScrollController _logScrollController = ScrollController();
   String _queryText = '';
   String _queryResult = '';
@@ -67,33 +66,17 @@ class _DebugScreenState extends ConsumerState<DebugScreen>
   List<LatLng> _lastRoutePoints = [];
   FitnessStats? _lastStats;
   Timer? _pollTimer;
-  DebugPrintCallback? _oldDebugPrint;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
-    _addLog('🔧 Debug screen opened');
-    _addLog('📦 Local DB activities: ${LocalStorageService.getAllActivities().length}');
+    EnterpriseLogger().logInfo('Debug Screen', 'Debug screen opened');
     _startGpsPolling();
-    
-    // Intercept debugPrint to show in UI
-    _oldDebugPrint = debugPrint;
-    debugPrint = (String? message, {int? wrapWidth}) {
-      if (message != null) {
-        _addLog(message);
-      }
-      if (_oldDebugPrint != null) {
-        _oldDebugPrint!(message, wrapWidth: wrapWidth);
-      }
-    };
   }
 
   @override
   void dispose() {
-    if (_oldDebugPrint != null) {
-      debugPrint = _oldDebugPrint!;
-    }
     _pollTimer?.cancel();
     _logScrollController.dispose();
     _tabController.dispose();
@@ -105,13 +88,13 @@ class _DebugScreenState extends ConsumerState<DebugScreen>
     _pollTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (!mounted) return;
 
-      final activityState = ref.watch(activityStateProvider);
-      final stats = ref.watch(fitnessStatsProvider);
-      final routePoints = ref.watch(routePointsProvider);
+      final activityState = ref.read(activityStateProvider);
+      final stats = ref.read(fitnessStatsProvider);
+      final routePoints = ref.read(routePointsProvider);
 
       // Log state changes
       if (activityState != _lastKnownState) {
-        _addLog('🔄 State: ${_lastKnownState?.name ?? 'N/A'} → $activityState');
+        EnterpriseLogger().logInfo('GPS Poll', '🔄 State: ${_lastKnownState?.name ?? 'N/A'} → $activityState');
         _lastKnownState = activityState;
       }
 
@@ -119,9 +102,7 @@ class _DebugScreenState extends ConsumerState<DebugScreen>
       if (routePoints.length > _lastRoutePoints.length) {
         final newPoints = routePoints.skip(_lastRoutePoints.length).toList();
         for (final point in newPoints) {
-          _addLog(
-            '📍 GPS: ${point.latitude.toStringAsFixed(6)}, ${point.longitude.toStringAsFixed(6)}',
-          );
+          EnterpriseLogger().logInfo('GPS Poll', '📍 GPS: ${point.latitude.toStringAsFixed(6)}, ${point.longitude.toStringAsFixed(6)}');
         }
         _lastRoutePoints = routePoints;
       }
@@ -131,40 +112,17 @@ class _DebugScreenState extends ConsumerState<DebugScreen>
         if (_lastStats != null) {
           final dist = stats.totalDistanceMeters - (_lastStats?.totalDistanceMeters ?? 0);
           if (dist > 0) {
-            _addLog(
-              '📊 Dist: ${stats.formattedDistance} | Speed: ${(stats.currentSpeedMps * 3.6).toStringAsFixed(1)} km/h | Cal: ${stats.estimatedCalories} | Route points: ${routePoints.length}',
-            );
+            EnterpriseLogger().logInfo('GPS Poll', '📊 Dist: ${stats.formattedDistance} | Speed: ${(stats.currentSpeedMps * 3.6).toStringAsFixed(1)} km/h | Route points: ${routePoints.length}');
           }
         }
         _lastStats = stats;
-      }
-
-      // Log GPS availability
-      if (activityState == ActivityState.running && routePoints.isEmpty) {
-        _addLog('⚠️ Activity running but NO GPS route points received!');
-      }
-    });
-  }
-
-  void _addLog(String message) {
-    if (!mounted) return;
-    setState(() {
-      final timestamp = DateTime.now().toString().substring(11, 23);
-      _logs.add('[$timestamp] $message');
-    });
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_logScrollController.hasClients) {
-        _logScrollController.animateTo(
-          _logScrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeOut,
-        );
       }
     });
   }
 
   Future<void> _shareLogs() async {
-    if (_logs.isEmpty) {
+    final logs = EnterpriseLogger().exportLogs();
+    if (logs.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('No logs to share')),
@@ -176,29 +134,15 @@ class _DebugScreenState extends ConsumerState<DebugScreen>
     try {
       final directory = await getTemporaryDirectory();
       final file = File('${directory.path}/calories_not_carbon_logs.txt');
-      
-      final buffer = StringBuffer();
-      buffer.writeln('Calories Not Carbon - Debug Logs');
-      buffer.writeln('Generated: ${DateTime.now()}');
-      buffer.writeln('--------------------------------');
-      for (final log in _logs) {
-        buffer.writeln(log);
-      }
-
-      await file.writeAsString(buffer.toString());
+      await file.writeAsString(logs);
 
       await Share.shareXFiles(
         [XFile(file.path)],
         subject: 'Calories Not Carbon Debug Logs',
-        text: 'Streaming logs from the debug console.',
+        text: 'Streaming logs from the Enterprise Logger.',
       );
     } catch (e) {
-      debugPrint('❌ Error sharing logs: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to share logs: $e')),
-        );
-      }
+      EnterpriseLogger().logError('Debug Screen', '❌ Error sharing logs: $e', StackTrace.current);
     }
   }
 
@@ -247,6 +191,7 @@ class _DebugScreenState extends ConsumerState<DebugScreen>
     final activityState = ref.watch(activityStateProvider);
     final stats = ref.watch(fitnessStatsProvider);
     final routePoints = ref.watch(routePointsProvider);
+    final allLogs = EnterpriseLogger().getRecentLogs(200);
 
     return Column(
       children: [
@@ -292,18 +237,11 @@ class _DebugScreenState extends ConsumerState<DebugScreen>
                     Text('⏱️ ${stats.formattedDuration}', style: const TextStyle(color: Colors.white, fontSize: 12)),
                   ],
                 ),
-                if (routePoints.isNotEmpty) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    '📍 Last: ${routePoints.last.latitude.toStringAsFixed(6)}, ${routePoints.last.longitude.toStringAsFixed(6)}',
-                    style: const TextStyle(color: Colors.greenAccent, fontSize: 11, fontFamily: 'monospace'),
-                  ),
-                ],
               ],
             ],
           ),
         ),
-        // Log list
+        // Log header
         Container(
           padding: const EdgeInsets.all(12),
           color: Colors.black54,
@@ -312,7 +250,7 @@ class _DebugScreenState extends ConsumerState<DebugScreen>
               const Icon(Icons.circle, size: 10, color: Colors.green),
               const SizedBox(width: 8),
               Text(
-                'Live GPS & DB Logs (${_logs.length})',
+                'Enterprise Logs (${allLogs.length})',
                 style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
               ),
               const Spacer(),
@@ -323,7 +261,7 @@ class _DebugScreenState extends ConsumerState<DebugScreen>
               ),
               const SizedBox(width: 8),
               TextButton(
-                onPressed: () => setState(() => _logs.clear()),
+                onPressed: () => setState(() => EnterpriseLogger().clearOldLogs()),
                 child: const Text('Clear', style: TextStyle(color: Colors.grey)),
               ),
             ],
@@ -335,23 +273,22 @@ class _DebugScreenState extends ConsumerState<DebugScreen>
             child: ListView.builder(
               controller: _logScrollController,
               padding: const EdgeInsets.all(12),
-              itemCount: _logs.length,
+              itemCount: allLogs.length,
               itemBuilder: (context, index) {
-                final log = _logs[index];
+                final log = allLogs[index];
                 Color logColor = Colors.green;
-                if (log.contains('❌') || log.contains('ERROR')) logColor = Colors.red;
-                if (log.contains('⚠️') || log.contains('WARN')) logColor = Colors.orange;
-                if (log.contains('💾')) logColor = Colors.blue;
-                if (log.contains('☁️')) logColor = Colors.purple;
+                if (log.level == LogLevel.error) logColor = Colors.red;
+                if (log.level == LogLevel.warning) logColor = Colors.orange;
+                if (log.category == 'Navigation') logColor = Colors.blue;
 
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 4),
                   child: SelectableText(
-                    log,
+                    log.toString(),
                     style: TextStyle(
                       color: logColor,
                       fontFamily: 'monospace',
-                      fontSize: 12,
+                      fontSize: 11,
                     ),
                   ),
                 );

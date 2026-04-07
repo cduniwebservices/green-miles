@@ -32,11 +32,20 @@ class _ActivityDetailScreenState extends ConsumerState<ActivityDetailScreen> {
   @override
   void initState() {
     super.initState();
-    _prepareChartData();
+    EnterpriseLogger().logInfo('ActivityDetailScreen', 'Initializing for session: ${widget.session.id}');
+    try {
+      _prepareChartData();
+      EnterpriseLogger().logInfo('ActivityDetailScreen', 'Chart data prepared successfully. Elevation spots: ${_elevationSpots.length}, Speed spots: ${_speedSpots.length}');
+    } catch (e, stack) {
+      EnterpriseLogger().logError('ActivityDetailScreen', 'Error preparing chart data: $e', stack);
+    }
   }
 
   void _prepareChartData() {
-    if (widget.session.waypoints.isEmpty) return;
+    if (widget.session.waypoints.isEmpty) {
+      EnterpriseLogger().logWarning('ActivityDetailScreen', 'No waypoints found in session');
+      return;
+    }
     
     final startTime = widget.session.stats.startTime;
     
@@ -66,102 +75,131 @@ class _ActivityDetailScreenState extends ConsumerState<ActivityDetailScreen> {
     final theme = Theme.of(context);
     final stats = widget.session.stats;
     
-    // Calculate current replay index
-    final totalPoints = widget.session.routePoints.length;
-    final currentPointIndex = (totalPoints * _replayProgress).floor().clamp(0, totalPoints - 1);
-    final visiblePoints = widget.session.routePoints.take(currentPointIndex + 1).toList();
-    
-    // Get stats at current replay point
-    FitnessStats? currentStats;
-    if (widget.session.waypoints.isNotEmpty) {
-      final totalWaypoints = widget.session.waypoints.length;
-      final currentWaypointIndex = (totalWaypoints * _replayProgress).floor().clamp(0, totalWaypoints - 1);
-      currentStats = widget.session.waypoints[currentWaypointIndex].statsAtTime;
+    // Safety check for route points
+    if (widget.session.routePoints.isEmpty) {
+      EnterpriseLogger().logWarning('ActivityDetailScreen', 'Route points are empty for session ${widget.session.id}');
     }
-    
-    final displayStats = currentStats ?? stats;
 
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: GlobalTheme.backgroundGradient,
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              // Custom AppBar
-              _buildHeader(theme),
-              
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 16),
-                      
-                      // 1. Session Summary Card
-                      _buildSummaryCard(theme, displayStats),
-                      
-                      const SizedBox(height: 24),
-                      
-                      // 2. Map Preview with Replay
-                      _buildMapReplay(theme, visiblePoints),
-                      
-                      const SizedBox(height: 24),
-                      
-                      // 3. Elevation Chart
-                      _buildChartSection(
-                        theme, 
-                        'Elevation vs Time', 
-                        'Elevation (m)', 
-                        _elevationSpots,
-                        GlobalTheme.primaryNeon,
-                        _replayProgress,
-                      ),
-                      
-                      const SizedBox(height: 24),
-                      
-                      // 4. Speed Chart
-                      _buildChartSection(
-                        theme, 
-                        'Speed vs Time', 
-                        'Speed (km/h)', 
-                        _speedSpots,
-                        GlobalTheme.primaryAction,
-                        _replayProgress,
-                        showTooltip: true,
-                        currentValue: (displayStats.currentSpeedMps * 3.6).toStringAsFixed(1),
-                        currentTime: _formatDuration(displayStats.activeDuration),
-                        currentDistance: (displayStats.totalDistanceMeters / 1000).toStringAsFixed(2),
-                      ),
-                      
-                      const SizedBox(height: 24),
-                      
-                      // 5. Scrubber Slider
-                      _buildScrubber(theme),
-                      
-                      const SizedBox(height: 32),
-                      
-                      // 6. View Full Stats Button
-                      AppButton.primary(
-                        text: 'View Full Stats',
-                        width: double.infinity,
-                        icon: Icons.analytics_outlined,
-                        onPressed: () => _showFullStats(context),
-                      ),
-                      
-                      const SizedBox(height: 40),
-                    ],
+    try {
+      // Calculate current replay index
+      final totalPoints = widget.session.routePoints.length;
+      final currentPointIndex = totalPoints > 0 
+          ? (totalPoints * _replayProgress).floor().clamp(0, totalPoints - 1)
+          : 0;
+      final visiblePoints = totalPoints > 0 
+          ? widget.session.routePoints.take(currentPointIndex + 1).toList()
+          : <LatLng>[];
+      
+      // Get stats at current replay point
+      FitnessStats? currentStats;
+      if (widget.session.waypoints.isNotEmpty) {
+        final totalWaypoints = widget.session.waypoints.length;
+        final currentWaypointIndex = (totalWaypoints * _replayProgress).floor().clamp(0, totalWaypoints - 1);
+        currentStats = widget.session.waypoints[currentWaypointIndex].statsAtTime;
+      }
+      
+      final displayStats = currentStats ?? stats;
+
+      return Scaffold(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: GlobalTheme.backgroundGradient,
+          ),
+          child: SafeArea(
+            child: Column(
+              children: [
+                // Custom AppBar
+                _buildHeader(theme),
+                
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 16),
+                        
+                        // 1. Session Summary Card
+                        _buildSummaryCard(theme, displayStats),
+                        
+                        const SizedBox(height: 24),
+                        
+                        // 2. Map Preview with Replay
+                        _buildMapReplay(theme, visiblePoints),
+                        
+                        const SizedBox(height: 24),
+                        
+                        // 3. Elevation Chart
+                        _buildChartSection(
+                          theme, 
+                          'Elevation vs Time', 
+                          'Elevation (m)', 
+                          _elevationSpots,
+                          GlobalTheme.primaryNeon,
+                          _replayProgress,
+                        ),
+                        
+                        const SizedBox(height: 24),
+                        
+                        // 4. Speed Chart
+                        _buildChartSection(
+                          theme, 
+                          'Speed vs Time', 
+                          'Speed (km/h)', 
+                          _speedSpots,
+                          GlobalTheme.primaryAction,
+                          _replayProgress,
+                          showTooltip: true,
+                          currentValue: (displayStats.currentSpeedMps * 3.6).toStringAsFixed(1),
+                          currentTime: _formatDuration(displayStats.activeDuration),
+                          currentDistance: (displayStats.totalDistanceMeters / 1000).toStringAsFixed(2),
+                        ),
+                        
+                        const SizedBox(height: 24),
+                        
+                        // 5. Scrubber Slider
+                        _buildScrubber(theme),
+                        
+                        const SizedBox(height: 32),
+                        
+                        // 6. View Full Stats Button
+                        AppButton.primary(
+                          text: 'View Full Stats',
+                          width: double.infinity,
+                          icon: Icons.analytics_outlined,
+                          onPressed: () => _showFullStats(context),
+                        ),
+                        
+                        const SizedBox(height: 40),
+                      ],
+                    ),
                   ),
                 ),
+              ],
+            ),
+          ),
+        ),
+      );
+    } catch (e, stack) {
+      EnterpriseLogger().logError('ActivityDetailScreen', 'CRITICAL BUILD ERROR: $e', stack);
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, color: Colors.red, size: 48),
+              const SizedBox(height: 16),
+              const Text('Error loading activity details'),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Go Back'),
               ),
             ],
           ),
         ),
-      ),
-    );
+      );
+    }
   }
 
   void _showFullStats(BuildContext context) {
