@@ -1123,9 +1123,9 @@ class StatsDisplay extends ConsumerWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _buildGridItem(theme, 'DISTANCE\n(km)', stats.formattedDistance.split(' ')[0], Icons.directions_run),
-            _buildGridItem(theme, 'AVG SPEED\n(km/h)', (stats.averageSpeedMps * 3.6).toStringAsFixed(1), Icons.speed),
-            _buildGridItem(theme, 'CURRENT\nPACE', stats.formattedCurrentPace, Icons.timer_outlined),
+            _buildGridItem(theme, 'DISTANCE', stats.formattedDistance.split(' ')[0], Icons.directions_run),
+            _buildGridItem(theme, 'AVG SPEED', (stats.averageSpeedMps * 3.6).toStringAsFixed(1), Icons.speed),
+            _buildGridItem(theme, 'PACE', stats.formattedCurrentPace, Icons.timer_outlined),
             _buildGridItem(theme, 'CALORIES', stats.estimatedCalories.toString(), Icons.local_fire_department_outlined),
           ],
         ),

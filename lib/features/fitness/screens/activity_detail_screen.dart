@@ -29,6 +29,13 @@ class _ActivityDetailScreenState extends ConsumerState<ActivityDetailScreen> {
   // Data for charts
   List<FlSpot> _elevationSpots = [];
   List<FlSpot> _speedSpots = [];
+  double _maxX = 1.0;
+
+  // Explicitly defined sizes for perfect alignment
+  static const double _chartSideReserved = 40.0;
+  static const double _chartNameReserved = 20.0;
+  static const double _totalLeftOffset = _chartSideReserved + _chartNameReserved;
+  static const double _chartBottomReserved = 22.0;
   
   @override
   void initState() {
@@ -36,7 +43,6 @@ class _ActivityDetailScreenState extends ConsumerState<ActivityDetailScreen> {
     EnterpriseLogger().logInfo('ActivityDetailScreen', 'Initializing for session: ${widget.session.id}');
     try {
       _prepareChartData();
-      EnterpriseLogger().logInfo('ActivityDetailScreen', 'Chart data prepared successfully. Elevation spots: ${_elevationSpots.length}, Speed spots: ${_speedSpots.length}');
     } catch (e, stack) {
       EnterpriseLogger().logError('ActivityDetailScreen', 'Error preparing chart data: $e', stack);
     }
@@ -51,6 +57,7 @@ class _ActivityDetailScreenState extends ConsumerState<ActivityDetailScreen> {
       // Add default spots for visual representation even if no waypoints exist
       _elevationSpots = [const FlSpot(0, 0), const FlSpot(100, 10)];
       _speedSpots = [const FlSpot(0, 0), const FlSpot(100, 12)];
+      _maxX = 100.0;
       return;
     }
     
@@ -75,6 +82,20 @@ class _ActivityDetailScreenState extends ConsumerState<ActivityDetailScreen> {
        _elevationSpots = [const FlSpot(0, 0), const FlSpot(100, 10)];
        _speedSpots = [const FlSpot(0, 0), const FlSpot(100, 12)];
     }
+
+    _maxX = _elevationSpots.last.x;
+  }
+
+  FitnessStats _interpolateStats(FitnessStats s1, FitnessStats s2, double t) {
+    return FitnessStats(
+      totalDistanceMeters: s1.totalDistanceMeters + (s2.totalDistanceMeters - s1.totalDistanceMeters) * t,
+      totalDuration: Duration(milliseconds: (s1.totalDuration.inMilliseconds + (s2.totalDuration.inMilliseconds - s1.totalDuration.inMilliseconds) * t).toInt()),
+      activeDuration: Duration(milliseconds: (s1.activeDuration.inMilliseconds + (s2.activeDuration.inMilliseconds - s1.activeDuration.inMilliseconds) * t).toInt()),
+      averageSpeedMps: s1.averageSpeedMps + (s2.averageSpeedMps - s1.averageSpeedMps) * t,
+      currentSpeedMps: s1.currentSpeedMps + (s2.currentSpeedMps - s1.currentSpeedMps) * t,
+      startTime: s1.startTime,
+      elevationGain: s1.elevationGain + (s2.elevationGain - s1.elevationGain) * t,
+    );
   }
 
   @override
@@ -88,7 +109,7 @@ class _ActivityDetailScreenState extends ConsumerState<ActivityDetailScreen> {
     }
 
     try {
-      // Calculate current replay index
+      // Calculate current replay index and interpolated data
       final totalPoints = widget.session.routePoints.length;
       final currentPointIndex = totalPoints > 0 
           ? (totalPoints * _replayProgress).floor().clamp(0, totalPoints - 1)
@@ -97,15 +118,32 @@ class _ActivityDetailScreenState extends ConsumerState<ActivityDetailScreen> {
           ? widget.session.routePoints.take(currentPointIndex + 1).toList()
           : <LatLng>[];
       
-      // Get stats at current replay point
-      FitnessStats? currentStats;
+      FitnessStats displayStats = stats;
+      double currentX = 0;
+
       if (widget.session.waypoints.isNotEmpty) {
         final totalWaypoints = widget.session.waypoints.length;
-        final currentWaypointIndex = (totalWaypoints * _replayProgress).floor().clamp(0, totalWaypoints - 1);
-        currentStats = widget.session.waypoints[currentWaypointIndex].statsAtTime;
+        final double exactIndex = (totalWaypoints - 1) * _replayProgress;
+        final int lowerIndex = exactIndex.floor();
+        final int upperIndex = exactIndex.ceil();
+        final double t = exactIndex - lowerIndex;
+
+        final w1 = widget.session.waypoints[lowerIndex];
+        final w2 = widget.session.waypoints[upperIndex];
+        
+        final startTime = widget.session.stats.startTime;
+        final x1 = w1.timestamp.difference(startTime).inSeconds.toDouble() / 60;
+        final x2 = w2.timestamp.difference(startTime).inSeconds.toDouble() / 60;
+        currentX = x1 + (x2 - x1) * t;
+
+        if (w1.statsAtTime != null && w2.statsAtTime != null) {
+          displayStats = _interpolateStats(w1.statsAtTime!, w2.statsAtTime!, t);
+        } else {
+          displayStats = w1.statsAtTime ?? stats;
+        }
+      } else {
+        currentX = _maxX * _replayProgress;
       }
-      
-      final displayStats = currentStats ?? stats;
 
       return Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
@@ -141,12 +179,11 @@ class _ActivityDetailScreenState extends ConsumerState<ActivityDetailScreen> {
                         LayoutBuilder(
                           builder: (context, constraints) {
                             final chartContainerWidth = constraints.maxWidth;
-                            // Left Padding (20) + Chart Left Titles (40) = 60px
-                            const horizontalOffset = 20.0 + 40.0;
-                            // Data Area = Container Width - Container Padding (20+20) - Left Titles (40)
-                            final dataAreaWidth = chartContainerWidth - 40.0 - 40.0;
+                            // horizontalOffset = left container padding (20) + chart left total offset (60)
+                            const horizontalOffset = 20.0 + _totalLeftOffset;
+                            final dataAreaWidth = chartContainerWidth - 40.0 - _totalLeftOffset;
                             
-                            final scrubberX = horizontalOffset + (dataAreaWidth * _replayProgress);
+                            final scrubberX = horizontalOffset + (dataAreaWidth * (currentX / _maxX));
                             // Clamp tooltip between left edge (0) and right edge (width - tooltip width)
                             final tooltipLeft = (scrubberX - 65).clamp(0.0, chartContainerWidth - 130.0);
 
@@ -161,7 +198,7 @@ class _ActivityDetailScreenState extends ConsumerState<ActivityDetailScreen> {
                                       'Elevation (m)', 
                                       _elevationSpots,
                                       GlobalTheme.primaryNeon,
-                                      _replayProgress,
+                                      currentX,
                                     ),
                                     const SizedBox(height: 12),
                                     _buildChartSection(
@@ -170,7 +207,7 @@ class _ActivityDetailScreenState extends ConsumerState<ActivityDetailScreen> {
                                       'Speed (km/h)', 
                                       _speedSpots,
                                       GlobalTheme.primaryAction,
-                                      _replayProgress,
+                                      currentX,
                                     ),
                                   ],
                                 ),
@@ -530,26 +567,28 @@ class _ActivityDetailScreenState extends ConsumerState<ActivityDetailScreen> {
     String yLabel, 
     List<FlSpot> spots, 
     Color color,
-    double progress,
+    double currentX,
   ) {
     if (spots.isEmpty) {
       return const SizedBox.shrink();
     }
 
-    // Calculate interpolated point for smooth movement
-    final double exactIndex = (spots.length - 1) * progress;
-    final int lowerIndex = exactIndex.floor();
-    final int upperIndex = exactIndex.ceil();
-    final double t = exactIndex - lowerIndex;
-
-    final lowerSpot = spots[lowerIndex];
-    final upperSpot = spots[upperIndex];
-    final currentY = lowerSpot.y + (upperSpot.y - lowerSpot.y) * t;
+    // Calculate interpolated Y for the given currentX
+    double currentY = 0;
+    for (var i = 0; i < spots.length - 1; i++) {
+      if (currentX >= spots[i].x && currentX <= spots[i+1].x) {
+        final t = (currentX - spots[i].x) / (spots[i+1].x - spots[i].x);
+        currentY = spots[i].y + (spots[i+1].y - spots[i].y) * t;
+        break;
+      }
+    }
+    // Handle bounds
+    if (currentX <= spots.first.x) currentY = spots.first.y;
+    if (currentX >= spots.last.x) currentY = spots.last.y;
     
     final minY = spots.map((s) => s.y).reduce((a, b) => a < b ? a : b);
     final maxY = spots.map((s) => s.y).reduce((a, b) => a > b ? a : b);
     final rangeY = (maxY - minY).abs() < 0.001 ? 1.0 : (maxY - minY);
-    
     final relativeY = (currentY - minY) / rangeY;
 
     return Container(
@@ -573,12 +612,10 @@ class _ActivityDetailScreenState extends ConsumerState<ActivityDetailScreen> {
           const SizedBox(height: 20),
           LayoutBuilder(
             builder: (context, constraints) {
-              const leftReserved = 40.0;
-              const bottomReserved = 22.0;
-              final dataWidth = constraints.maxWidth - leftReserved;
-              final dataHeight = 120.0 - bottomReserved;
+              final dataWidth = constraints.maxWidth - _totalLeftOffset;
+              final dataHeight = 120.0 - _chartBottomReserved;
               
-              final dotLeft = leftReserved + (dataWidth * progress);
+              final dotLeft = _totalLeftOffset + (dataWidth * (currentX / _maxX));
               final dotTop = dataHeight * (1.0 - relativeY);
 
               return Stack(
@@ -588,6 +625,9 @@ class _ActivityDetailScreenState extends ConsumerState<ActivityDetailScreen> {
                     height: 120,
                     child: LineChart(
                       LineChartData(
+                        lineTouchData: const LineTouchData(
+                          handleBuiltInTouches: false,
+                        ),
                         gridData: FlGridData(
                           show: true,
                           drawVerticalLine: true,
@@ -602,23 +642,24 @@ class _ActivityDetailScreenState extends ConsumerState<ActivityDetailScreen> {
                         ),
                         titlesData: FlTitlesData(
                           leftTitles: AxisTitles(
+                            axisNameSize: _chartNameReserved,
+                            axisNameWidget: Text(
+                              yLabel,
+                              style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 10),
+                            ),
                             sideTitles: SideTitles(
                               showTitles: true,
-                              reservedSize: leftReserved,
+                              reservedSize: _chartSideReserved,
                               getTitlesWidget: (value, meta) => Text(
                                 value.toInt().toString(),
                                 style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 10),
                               ),
                             ),
-                            axisNameWidget: Text(
-                              yLabel,
-                              style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 10),
-                            ),
                           ),
                           bottomTitles: AxisTitles(
                             sideTitles: SideTitles(
                               showTitles: true,
-                              reservedSize: bottomReserved,
+                              reservedSize: _chartBottomReserved,
                               getTitlesWidget: (value, meta) => Text(
                                 value.toInt().toString(),
                                 style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 10),
@@ -633,7 +674,7 @@ class _ActivityDetailScreenState extends ConsumerState<ActivityDetailScreen> {
                           topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false, reservedSize: 0)),
                         ),
                         minX: 0,
-                        maxX: spots.last.x,
+                        maxX: _maxX,
                         minY: minY,
                         maxY: maxY,
                         borderData: FlBorderData(show: false),
@@ -666,7 +707,7 @@ class _ActivityDetailScreenState extends ConsumerState<ActivityDetailScreen> {
                   Positioned(
                     left: dotLeft,
                     top: 0,
-                    bottom: bottomReserved,
+                    bottom: _chartBottomReserved,
                     child: Container(
                       width: 2,
                       color: color.withOpacity(0.5),
@@ -732,9 +773,9 @@ class _ActivityDetailScreenState extends ConsumerState<ActivityDetailScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Icon(Icons.speed, size: 14, color: GlobalTheme.primaryAction),
+              const Icon(Icons.terrain, size: 14, color: GlobalTheme.primaryNeon),
               Text(
-                '${(stats.currentSpeedMps * 3.6).toStringAsFixed(1)} km/h',
+                '${stats.elevationGain.toStringAsFixed(1)} m',
                 style: const TextStyle(color: Colors.black, fontSize: 11, fontWeight: FontWeight.bold),
               ),
             ],
@@ -743,9 +784,9 @@ class _ActivityDetailScreenState extends ConsumerState<ActivityDetailScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Icon(Icons.terrain, size: 14, color: GlobalTheme.primaryNeon),
+              const Icon(Icons.speed, size: 14, color: GlobalTheme.primaryAction),
               Text(
-                '${stats.elevationGain.toStringAsFixed(1)} m',
+                '${(stats.currentSpeedMps * 3.6).toStringAsFixed(1)} km/h',
                 style: const TextStyle(color: Colors.black, fontSize: 11, fontWeight: FontWeight.bold),
               ),
             ],

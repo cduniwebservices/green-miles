@@ -155,10 +155,29 @@ class _DebugScreenState extends ConsumerState<DebugScreen>
         title: const Text('Debug Console', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.black87,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_rounded, color: Colors.white, size: 20),
-          onPressed: () => Navigator.of(context).pop(),
-          tooltip: 'Go Back',
+        leadingWidth: 72,
+        leading: Center(
+          child: Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: GlobalTheme.surfaceCard,
+              borderRadius: BorderRadius.circular(GlobalTheme.radiusMedium),
+              boxShadow: GlobalTheme.cardShadow,
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(GlobalTheme.radiusMedium),
+                onTap: () => Navigator.of(context).pop(),
+                child: const Icon(
+                  Icons.arrow_back_ios_rounded,
+                  color: GlobalTheme.textPrimary,
+                  size: 20,
+                ),
+              ),
+            ),
+          ),
         ),
         bottom: TabBar(
           controller: _tabController,

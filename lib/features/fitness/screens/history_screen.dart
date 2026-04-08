@@ -358,21 +358,21 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
                         _buildStatItem(
                           theme,
                           'Distance',
-                          '${(activity.stats.totalDistanceMeters / 1000).toStringAsFixed(2)} km',
+                          activity.stats.formattedDistance,
                           Icons.route_rounded,
                         ),
                         const SizedBox(width: GlobalTheme.spacing24),
                         _buildStatItem(
                           theme,
                           'Pace',
-                          _formatPace(activity.stats.averagePaceSecondsPerKm / 60),
+                          '${activity.stats.formattedAveragePace}/km',
                           Icons.speed_rounded,
                         ),
                         const SizedBox(width: GlobalTheme.spacing24),
                         _buildStatItem(
                           theme,
                           'Calories',
-                          '${activity.stats.estimatedCalories}',
+                          activity.stats.formattedCalories,
                           Icons.local_fire_department_rounded,
                         ),
                       ],
@@ -474,9 +474,10 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
 
             AppButton.primary(
               onPressed: () {
-                NavigationService.goToRun(context);
+                NavigationService.goToGoals(context);
               },
-              text: 'START ACTIVITY',
+              text: 'GET STARTED',
+              icon: Icons.rocket_launch_rounded,
             ).animate().fadeIn(delay: 700.ms).slideY(begin: 0.2, end: 0),
           ],
         ),

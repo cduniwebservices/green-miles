@@ -178,10 +178,17 @@ class FitnessStats {
   }
 
   String get formattedAveragePace {
-    if (averagePaceSecondsPerKm <= 0) return '--:--';
+    double paceSeconds = averagePaceSecondsPerKm;
+    
+    // If pace is missing but we have distance and time, calculate it
+    if (paceSeconds <= 0 && totalDistanceMeters > 0 && activeDuration.inSeconds > 0) {
+      paceSeconds = activeDuration.inSeconds / (totalDistanceMeters / 1000);
+    }
 
-    final minutes = (averagePaceSecondsPerKm / 60).floor();
-    final seconds = (averagePaceSecondsPerKm % 60).round();
+    if (paceSeconds <= 0) return '--:--';
+
+    final minutes = (paceSeconds / 60).floor();
+    final seconds = (paceSeconds % 60).round();
     return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
 

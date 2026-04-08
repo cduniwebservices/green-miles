@@ -143,15 +143,19 @@ class _PermissionOnboardingFlowState extends State<PermissionOnboardingFlow>
     });
 
     if (result.isSuccess) {
-      // Check if notification permission was specifically denied
+      // Check if notification permission was specifically denied or not granted
       final notificationStatus = result.permissions[Permission.notification];
-      if (notificationStatus != null && notificationStatus.isDenied) {
-        _showNotificationExplanationDialog();
+      if (notificationStatus != null && !notificationStatus.isGranted) {
+        if (mounted) {
+          _showNotificationExplanationDialog();
+        }
       } else {
         widget.onComplete();
       }
     } else {
-      _showPermissionDeniedDialog();
+      if (mounted) {
+        _showPermissionDeniedDialog();
+      }
     }
   }
 
