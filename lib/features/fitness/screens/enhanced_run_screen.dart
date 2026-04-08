@@ -28,6 +28,7 @@ class _EnhancedRunScreenState extends ConsumerState<EnhancedRunScreen>
   final ActivityType _selectedActivityType = ActivityType.running;
   bool _isInitialized = false;
   bool _isLoading = false;
+  bool _isStopDialogShowing = false;
 
   @override
   void initState() {
@@ -165,8 +166,8 @@ class _EnhancedRunScreenState extends ConsumerState<EnhancedRunScreen>
     FitnessStats stats,
     ActivityActions actions,
   ) {
-    final statusText = _getStatusText(state);
-    final statusColor = _getStatusColor(state, theme);
+    final statusText = _isStopDialogShowing ? 'Confirm activity stop' : _getStatusText(state);
+    final statusColor = _isStopDialogShowing ? GlobalTheme.statusError : _getStatusColor(state, theme);
     final mediaQuery = MediaQuery.of(context);
     final isCompact = mediaQuery.size.height < 700;
     final speedKmh = stats.currentSpeedMps * 3.6;
@@ -263,7 +264,7 @@ class _EnhancedRunScreenState extends ConsumerState<EnhancedRunScreen>
                       SizedBox(width: isCompact ? 6 : 8),
 
                       Text(
-                        state.displayName.toUpperCase(),
+                        _isStopDialogShowing ? 'STOPPED' : state.displayName.toUpperCase(),
                         style: theme.textTheme.labelSmall?.copyWith(
                           color: statusColor,
                           fontWeight: FontWeight.bold,
@@ -669,26 +670,46 @@ class _EnhancedRunScreenState extends ConsumerState<EnhancedRunScreen>
   Future<void> _handleStopActivity(ActivityActions actions) async {
     final distance = ref.read(fitnessStatsProvider).totalDistanceMeters;
 
-    // Check for minimum distance requirement (1km)
-    if (distance < 1000) {
-      final shouldDiscard = await _showInsufficientDistanceDialog();
-      if (shouldDiscard == true) {
-        actions.resetActivity();
-        if (mounted) {
-          context.go('/goals');
-        }
-      }
-      return;
-    }
-
-    final shouldStop = await _showStopConfirmation();
-    if (!shouldStop) return;
-
     setState(() {
-      _isLoading = true;
+      _isStopDialogShowing = true;
     });
 
     try {
+      // Check for minimum distance requirement (1km)
+      if (distance < 1000) {
+        final shouldDiscard = await _showInsufficientDistanceDialog();
+        if (shouldDiscard == true) {
+          actions.resetActivity();
+          if (mounted) {
+            context.go('/goals');
+          }
+          return;
+        }
+        
+        if (mounted) {
+          setState(() {
+            _isStopDialogShowing = false;
+          });
+        }
+        return;
+      }
+
+      final shouldStop = await _showStopConfirmation();
+      if (!shouldStop) {
+        if (mounted) {
+          setState(() {
+            _isStopDialogShowing = false;
+          });
+        }
+        return;
+      }
+
+      if (mounted) {
+        setState(() {
+          _isLoading = true;
+        });
+      }
+
       await HapticFeedback.mediumImpact();
 
       // Stop the activity and get the completed session
@@ -724,6 +745,7 @@ class _EnhancedRunScreenState extends ConsumerState<EnhancedRunScreen>
       if (mounted) {
         setState(() {
           _isLoading = false;
+          _isStopDialogShowing = false;
         });
       }
     }
@@ -761,6 +783,7 @@ class _EnhancedRunScreenState extends ConsumerState<EnhancedRunScreen>
               Row(
                 children: [
                   Expanded(
+                    flex: 3,
                     child: OutlinedButton(
                       onPressed: () => Navigator.of(context).pop(false),
                       style: OutlinedButton.styleFrom(
@@ -771,11 +794,12 @@ class _EnhancedRunScreenState extends ConsumerState<EnhancedRunScreen>
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text('CONTINUE ACTIVITY'),
+                      child: const Text('CONTINUE ACTIVITY', style: TextStyle(fontSize: 12)),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
+                    flex: 2,
                     child: ElevatedButton(
                       onPressed: () => Navigator.of(context).pop(true),
                       style: ElevatedButton.styleFrom(
