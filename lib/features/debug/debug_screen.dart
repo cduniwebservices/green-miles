@@ -394,15 +394,41 @@ class _DebugScreenState extends ConsumerState<DebugScreen>
           const SizedBox(height: 16),
 
           // Actions
-          ElevatedButton.icon(
-            onPressed: () {
-              LocalStorageService.clearAllActivities();
-              EnterpriseLogger().logInfo('Debug', '🗑️ All local activities cleared');
-              setState(() {});
-            },
-            icon: const Icon(Icons.delete_forever, color: Colors.red),
-            label: const Text('Clear All Local Data', style: TextStyle(color: Colors.red)),
-            style: ElevatedButton.styleFrom(backgroundColor: GlobalTheme.surfaceCard),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () async {
+                    EnterpriseLogger().logInfo('Debug', '🔄 Manual sync triggered...');
+                    await SyncService().manualSync();
+                    EnterpriseLogger().logInfo('Debug', '✅ Manual sync complete');
+                    if (mounted) setState(() {});
+                  },
+                  icon: const Icon(Icons.cloud_upload, color: Colors.purple),
+                  label: const Text('Sync to Remote', style: TextStyle(color: Colors.purple)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: GlobalTheme.surfaceCard,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    LocalStorageService.clearAllActivities();
+                    EnterpriseLogger().logInfo('Debug', '🗑️ All local activities cleared');
+                    setState(() {});
+                  },
+                  icon: const Icon(Icons.delete_forever, color: Colors.red),
+                  label: const Text('Clear All Local Data', style: TextStyle(color: Colors.red)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: GlobalTheme.surfaceCard,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -516,21 +542,6 @@ class _DebugScreenState extends ConsumerState<DebugScreen>
             color: Colors.orange,
             onTap: () => _generateMockRoute('cycling', 15000),
           ),
-
-    const SizedBox(height: 32),
-
-    // Manual sync button
-    ElevatedButton.icon(
-      onPressed: () async {
-        EnterpriseLogger().logInfo('Debug', '🔄 Manual sync triggered...');
-        await SyncService().manualSync();
-        EnterpriseLogger().logInfo('Debug', '✅ Manual sync complete');
-        setState(() {});
-      },
-      icon: const Icon(Icons.cloud_upload, color: Colors.purple),
-      label: const Text('Force Sync to Supabase', style: TextStyle(color: Colors.purple)),
-      style: ElevatedButton.styleFrom(backgroundColor: GlobalTheme.surfaceCard),
-    ),
 
     const SizedBox(height: 48),
 

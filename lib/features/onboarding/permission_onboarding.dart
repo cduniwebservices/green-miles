@@ -11,12 +11,10 @@ import '../../theme/global_theme.dart';
 /// Enterprise-level permission onboarding flow
 class PermissionOnboardingFlow extends StatefulWidget {
   final VoidCallback onComplete;
-  final bool canSkip;
 
   const PermissionOnboardingFlow({
     super.key,
     required this.onComplete,
-    this.canSkip = true,
   });
 
   @override
@@ -172,27 +170,17 @@ class _PermissionOnboardingFlowState extends State<PermissionOnboardingFlow>
             SizedBox(width: 12),
             Expanded(
               child: Text(
-                'Notifications are Important',
+                'Notifications Required',
                 style: TextStyle(color: GlobalTheme.textPrimary, fontWeight: FontWeight.bold),
               ),
             ),
           ],
         ),
         content: const Text(
-          'Without notification permissions, the app may not be able to maintain a stable GPS connection when your screen is off or when the app is in the background. This could lead to inaccurate distance tracking.',
+          'Notifications are required to keep GPS active when your screen is off. Without this, tracking will be inaccurate.',
           style: TextStyle(color: GlobalTheme.textSecondary, height: 1.5),
         ),
         actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              widget.onComplete();
-            },
-            child: const Text(
-              'Continue Without',
-              style: TextStyle(color: GlobalTheme.textTertiary),
-            ),
-          ),
           ElevatedButton(
             onPressed: () async {
               Navigator.of(context).pop();
@@ -202,8 +190,9 @@ class _PermissionOnboardingFlowState extends State<PermissionOnboardingFlow>
               backgroundColor: GlobalTheme.primaryAction,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              minimumSize: const Size(double.infinity, 50),
             ),
-            child: const Text('Try Again'),
+            child: const Text('ENABLE NOTIFICATIONS'),
           ),
         ],
       ),
@@ -224,9 +213,10 @@ class _PermissionOnboardingFlowState extends State<PermissionOnboardingFlow>
     if (status.isGranted) {
       widget.onComplete();
     } else {
-      // If still denied, just proceed to complete the flow since it's not "essential"
-      // but they were given a second chance and warned.
-      widget.onComplete();
+      // If still denied, show the explanation dialog again
+      if (mounted) {
+        _showNotificationExplanationDialog();
+      }
     }
   }
 
@@ -248,22 +238,10 @@ class _PermissionOnboardingFlowState extends State<PermissionOnboardingFlow>
           ],
         ),
         content: const Text(
-          'Some features may not work properly without these permissions. You can change them later in the app settings.',
+          'GPS and Activity permissions are mandatory for this app to function. Please enable them in your device settings to continue.',
           style: TextStyle(color: GlobalTheme.textSecondary, height: 1.5),
         ),
         actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              if (widget.canSkip) {
-                widget.onComplete();
-              }
-            },
-            child: Text(
-              widget.canSkip ? 'Continue Anyway' : 'OK',
-              style: const TextStyle(color: GlobalTheme.textSecondary),
-            ),
-          ),
           ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop();
@@ -272,8 +250,9 @@ class _PermissionOnboardingFlowState extends State<PermissionOnboardingFlow>
             style: ElevatedButton.styleFrom(
               backgroundColor: GlobalTheme.primaryNeon,
               foregroundColor: Colors.black,
+              minimumSize: const Size(double.infinity, 50),
             ),
-            child: const Text('Open Settings'),
+            child: const Text('OPEN DEVICE SETTINGS'),
           ),
         ],
       ),
@@ -331,17 +310,6 @@ class _PermissionOnboardingFlowState extends State<PermissionOnboardingFlow>
                   ),
                 ),
               const Spacer(),
-              if (widget.canSkip)
-                TextButton(
-                  onPressed: widget.onComplete,
-                  child: const Text(
-                    'Skip',
-                    style: TextStyle(
-                      color: GlobalTheme.textSecondary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
             ],
           ),
           const SizedBox(height: 16),

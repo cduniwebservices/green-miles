@@ -6,6 +6,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../components/app_button.dart';
 import '../../theme/global_theme.dart';
 import '../../services/version_service.dart';
+import '../../services/sync_service.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -16,11 +17,14 @@ class WelcomeScreen extends StatefulWidget {
 
 class _WelcomeScreenState extends State<WelcomeScreen>
     with SingleTickerProviderStateMixin {
-  
+
   @override
   void initState() {
     super.initState();
+    // Attempt to sync any pending activities when app starts
+    SyncService().syncPendingActivities();
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -179,8 +183,18 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     icon: Icons.rocket_launch_rounded,
                     onPressed: () async {
                       await HapticFeedback.mediumImpact();
+                      
+                      // Check permissions first
+                      final permissionService = PermissionService();
+                      await permissionService.initialize();
+                      final state = permissionService.currentState;
+                      
                       if (mounted) {
-                        context.go('/goals'); 
+                        if (state == PermissionState.allGranted) {
+                          context.go('/goals');
+                        } else {
+                          context.go('/permission-onboarding');
+                        }
                       }
                     },
                   ),

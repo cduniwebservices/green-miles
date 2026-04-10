@@ -31,11 +31,11 @@ class _ActivityDetailScreenState extends ConsumerState<ActivityDetailScreen> {
   List<FlSpot> _speedSpots = [];
   double _maxX = 1.0;
 
-  // Explicitly defined sizes for perfect alignment
-  static const double _chartSideReserved = 40.0;
-  static const double _chartNameReserved = 20.0;
-  static const double _totalLeftOffset = _chartSideReserved + _chartNameReserved;
-  static const double _chartBottomReserved = 22.0;
+  // Zeroed out for full-width graphs without labels
+  static const double _chartSideReserved = 0.0;
+  static const double _chartNameReserved = 0.0;
+  static const double _totalLeftOffset = 0.0;
+  static const double _chartBottomReserved = 0.0;
   
   @override
   void initState() {
@@ -179,9 +179,9 @@ class _ActivityDetailScreenState extends ConsumerState<ActivityDetailScreen> {
                         LayoutBuilder(
                           builder: (context, constraints) {
                             final chartContainerWidth = constraints.maxWidth;
-                            // horizontalOffset = left container padding (20) + chart left total offset (60)
-                            const horizontalOffset = 20.0 + _totalLeftOffset;
-                            final dataAreaWidth = chartContainerWidth - 40.0 - _totalLeftOffset;
+                            // horizontalOffset = left container padding (20)
+                            const horizontalOffset = 20.0;
+                            final dataAreaWidth = chartContainerWidth - 40.0;
                             
                             final scrubberX = horizontalOffset + (dataAreaWidth * (currentX / _maxX));
                             // Clamp tooltip between left edge (0) and right edge (width - tooltip width)
@@ -214,7 +214,7 @@ class _ActivityDetailScreenState extends ConsumerState<ActivityDetailScreen> {
                                 
                                 // Floating shared tooltip positioned between charts
                                 Positioned(
-                                  top: 175, // Overlap point between elevation and speed charts
+                                  top: 175,
                                   left: tooltipLeft,
                                   child: _buildSharedTooltip(theme, displayStats),
                                 ),
@@ -612,10 +612,10 @@ class _ActivityDetailScreenState extends ConsumerState<ActivityDetailScreen> {
           const SizedBox(height: 20),
           LayoutBuilder(
             builder: (context, constraints) {
-              final dataWidth = constraints.maxWidth - _totalLeftOffset;
-              final dataHeight = 120.0 - _chartBottomReserved;
+              final dataWidth = constraints.maxWidth;
+              final dataHeight = 120.0;
               
-              final dotLeft = _totalLeftOffset + (dataWidth * (currentX / _maxX));
+              final dotLeft = (dataWidth * (currentX / _maxX));
               final dotTop = dataHeight * (1.0 - relativeY);
 
               return Stack(
@@ -640,38 +640,11 @@ class _ActivityDetailScreenState extends ConsumerState<ActivityDetailScreen> {
                             strokeWidth: 1,
                           ),
                         ),
-                        titlesData: FlTitlesData(
-                          leftTitles: AxisTitles(
-                            axisNameSize: _chartNameReserved,
-                            axisNameWidget: Text(
-                              yLabel,
-                              style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 10),
-                            ),
-                            sideTitles: SideTitles(
-                              showTitles: true,
-                              reservedSize: _chartSideReserved,
-                              getTitlesWidget: (value, meta) => Text(
-                                value.toInt().toString(),
-                                style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 10),
-                              ),
-                            ),
-                          ),
-                          bottomTitles: AxisTitles(
-                            sideTitles: SideTitles(
-                              showTitles: true,
-                              reservedSize: _chartBottomReserved,
-                              getTitlesWidget: (value, meta) => Text(
-                                value.toInt().toString(),
-                                style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 10),
-                              ),
-                            ),
-                            axisNameWidget: Text(
-                              'Time (m)',
-                              style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 10),
-                            ),
-                          ),
-                          rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false, reservedSize: 0)),
-                          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false, reservedSize: 0)),
+                        titlesData: const FlTitlesData(
+                          leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                          bottomTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                          rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                          topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
                         ),
                         minX: 0,
                         maxX: _maxX,
@@ -707,7 +680,7 @@ class _ActivityDetailScreenState extends ConsumerState<ActivityDetailScreen> {
                   Positioned(
                     left: dotLeft,
                     top: 0,
-                    bottom: _chartBottomReserved,
+                    bottom: 0,
                     child: Container(
                       width: 2,
                       color: color.withOpacity(0.5),

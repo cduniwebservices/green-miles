@@ -276,38 +276,37 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
             child: InkWell(
               borderRadius: BorderRadius.circular(GlobalTheme.radiusLarge),
               onTap: () => _showActivityDetails(activity),
-              child: Padding(
-                padding: const EdgeInsets.all(GlobalTheme.spacing20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Header with date and activity type
-                    Row(
+              child: Stack(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(GlobalTheme.spacing20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
-                          padding: const EdgeInsets.all(GlobalTheme.spacing8),
-                          decoration: BoxDecoration(
-                            color: _getActivityColor(
-                              activity.activityType,
-                            ).withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(
-                              GlobalTheme.radiusSmall,
+                        // Header with date and activity type
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(GlobalTheme.spacing8),
+                              decoration: BoxDecoration(
+                                color: _getActivityColor(
+                                  activity,
+                                ).withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(
+                                  GlobalTheme.radiusSmall,
+                                ),
+                              ),
+                              child: Icon(
+                                _getActivityIcon(activity),
+                                color: _getActivityColor(activity),
+                                size: 20,
+                              ),
                             ),
-                          ),
-                          child: Icon(
-                            _getActivityIcon(activity.activityType),
-                            color: _getActivityColor(activity.activityType),
-                            size: 20,
-                          ),
-                        ),
+                            const SizedBox(width: GlobalTheme.spacing12),
 
-                        const SizedBox(width: GlobalTheme.spacing12),
-
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     _getActivityTitle(activity),
@@ -316,81 +315,85 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
-                                  if (activity.isSynced) ...[
-                                    const SizedBox(width: 8),
-                                    const Icon(
-                                      Icons.cloud_done_rounded,
-                                      color: GlobalTheme.primaryAccent,
-                                      size: 14,
+                                  Text(
+                                    _formatDate(activity.stats.startTime),
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: GlobalTheme.textTertiary,
                                     ),
-                                  ],
+                                  ),
                                 ],
                               ),
-                              Text(
-                                _formatDate(activity.stats.startTime),
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: GlobalTheme.textTertiary,
+                            ),
+
+                            // Duration
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: GlobalTheme.spacing12,
+                                vertical: GlobalTheme.spacing6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: GlobalTheme.backgroundTertiary,
+                                borderRadius: BorderRadius.circular(
+                                  GlobalTheme.radiusLarge,
+                                ),
+                                border: Border.all(
+                                  color: GlobalTheme.surfaceBorder.withOpacity(0.5),
                                 ),
                               ),
-                            ],
-                          ),
+                              child: Text(
+                                _formatDuration(activity.stats.totalDuration),
+                                style: theme.textTheme.labelMedium?.copyWith(
+                                  color: GlobalTheme.textSecondary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
 
-                        // Duration
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: GlobalTheme.spacing12,
-                            vertical: GlobalTheme.spacing6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: GlobalTheme.backgroundTertiary,
-                            borderRadius: BorderRadius.circular(
-                              GlobalTheme.radiusLarge,
+                        const SizedBox(height: GlobalTheme.spacing20),
+
+                        // Stats row
+                        Row(
+                          children: [
+                            _buildStatItem(
+                              theme,
+                              'Distance',
+                              activity.stats.formattedDistance,
+                              Icons.route_rounded,
                             ),
-                            border: Border.all(
-                              color: GlobalTheme.surfaceBorder.withOpacity(0.5),
+                            const SizedBox(width: GlobalTheme.spacing24),
+                            _buildStatItem(
+                              theme,
+                              'Pace',
+                              '${activity.stats.formattedAveragePace}/km',
+                              Icons.speed_rounded,
                             ),
-                          ),
-                          child: Text(
-                            _formatDuration(activity.stats.totalDuration),
-                            style: theme.textTheme.labelMedium?.copyWith(
-                              color: GlobalTheme.textSecondary,
-                              fontWeight: FontWeight.w600,
+                            const SizedBox(width: GlobalTheme.spacing24),
+                            _buildStatItem(
+                              theme,
+                              'Calories',
+                              activity.stats.formattedCalories,
+                              Icons.local_fire_department_rounded,
                             ),
-                          ),
+                          ],
                         ),
                       ],
                     ),
-
-                    const SizedBox(height: GlobalTheme.spacing20),
-
-                    // Stats row
-                    Row(
-                      children: [
-                        _buildStatItem(
-                          theme,
-                          'Distance',
-                          activity.stats.formattedDistance,
-                          Icons.route_rounded,
-                        ),
-                        const SizedBox(width: GlobalTheme.spacing24),
-                        _buildStatItem(
-                          theme,
-                          'Pace',
-                          '${activity.stats.formattedAveragePace}/km',
-                          Icons.speed_rounded,
-                        ),
-                        const SizedBox(width: GlobalTheme.spacing24),
-                        _buildStatItem(
-                          theme,
-                          'Calories',
-                          activity.stats.formattedCalories,
-                          Icons.local_fire_department_rounded,
-                        ),
-                      ],
+                  ),
+                  
+                  // Sync Indicator in bottom right
+                  if (activity.isSynced)
+                    Positioned(
+                      bottom: 12,
+                      right: 12,
+                      child: Icon(
+                        Icons.cloud_done_rounded,
+                        color: GlobalTheme.primaryAccent.withOpacity(0.7),
+                        size: 16,
+                      ),
                     ),
-                  ],
-                ),
+                ],
               ),
             ),
           ),
@@ -634,30 +637,18 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
     }
   }
 
-  Color _getActivityColor(ActivityType type) {
-    switch (type) {
-      case ActivityType.running:
-        return GlobalTheme.primaryAccent;
-      case ActivityType.walking:
-        return GlobalTheme.statusInfo;
-      case ActivityType.cycling:
-        return GlobalTheme.primaryAction;
-      case ActivityType.hiking:
-        return GlobalTheme.statusWarning;
-    }
+  Color _getActivityColor(ActivitySession activity) {
+    final speedKmh = activity.stats.averageSpeedMps * 3.6;
+    if (speedKmh < 6.0) return GlobalTheme.statusInfo; // Walk
+    if (speedKmh < 20.0) return GlobalTheme.primaryAccent; // Run
+    return GlobalTheme.primaryAction; // Ride
   }
 
-  IconData _getActivityIcon(ActivityType type) {
-    switch (type) {
-      case ActivityType.running:
-        return Icons.directions_run_rounded;
-      case ActivityType.walking:
-        return Icons.directions_walk_rounded;
-      case ActivityType.cycling:
-        return Icons.directions_bike_rounded;
-      case ActivityType.hiking:
-        return Icons.hiking_rounded;
-    }
+  IconData _getActivityIcon(ActivitySession activity) {
+    final speedKmh = activity.stats.averageSpeedMps * 3.6;
+    if (speedKmh < 6.0) return Icons.directions_walk_rounded;
+    if (speedKmh < 20.0) return Icons.directions_run_rounded;
+    return Icons.directions_bike_rounded;
   }
 
   String _getActivityTitle(ActivitySession activity) {

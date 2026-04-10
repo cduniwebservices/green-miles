@@ -35,8 +35,8 @@ class SyncService {
 
   /// Handle connectivity changes
   void _onConnectivityChanged(List<ConnectivityResult> result) {
-    // Auto-sync only on WiFi (not mobile data)
-    if (result.contains(ConnectivityResult.wifi)) {
+    // Auto-sync on any active connection (WiFi or Mobile)
+    if (result.any((r) => r != ConnectivityResult.none)) {
       syncPendingActivities();
     }
   }
