@@ -5,9 +5,9 @@ import 'package:latlong2/latlong.dart';
 import 'package:uuid/uuid.dart';
 import 'package:pedometer/pedometer.dart';
 import '../models/fitness_models.dart';
-import '../services/location_service.dart';
-import '../services/local_storage_service.dart';
-import '../services/weather_service.dart';
+import 'location_service.dart';
+import 'local_storage_service.dart';
+import 'weather_service.dart';
 
 /// Million-dollar level activity controller for real-time fitness tracking
 class ActivityController extends ChangeNotifier {

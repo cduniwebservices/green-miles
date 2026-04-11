@@ -30,6 +30,9 @@ extension ActivityStateExtension on ActivityState {
         return Colors.blue;
     }
   }
+
+  bool get isActive =>
+      this == ActivityState.running || this == ActivityState.paused;
 }
 
 /// Activity types available for tracking
@@ -156,6 +159,8 @@ class FitnessStats {
     return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
 
+  String get formattedActiveDuration => formattedDuration;
+
   String get formattedAveragePace {
     if (averagePaceSecondsPerKm == 0 || averagePaceSecondsPerKm.isInfinite) {
       return '--:-- /km';
@@ -164,6 +169,18 @@ class FitnessStats {
     final secs = (averagePaceSecondsPerKm % 60).toInt();
     return '${mins.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')} /km';
   }
+
+  String get formattedCurrentPace {
+    if (currentPaceSecondsPerKm == 0 || currentPaceSecondsPerKm.isInfinite) {
+      return '--:-- /km';
+    }
+    final mins = currentPaceSecondsPerKm ~/ 60;
+    final secs = (currentPaceSecondsPerKm % 60).toInt();
+    return '${mins.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')} /km';
+  }
+
+  String get formattedCurrentSpeed =>
+      '${(currentSpeedMps * 3.6).toStringAsFixed(1)} km/h';
 
   String get formattedSteps => totalSteps.toString();
 
