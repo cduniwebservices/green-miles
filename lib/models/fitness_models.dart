@@ -222,6 +222,7 @@ class ActivitySession {
   final List<ActivityWaypoint> waypoints;
   final Map<String, dynamic> metadata;
   final bool isValid;
+  final String? activityReplaced;
 
   const ActivitySession({
     required this.id,
@@ -232,6 +233,7 @@ class ActivitySession {
     this.waypoints = const [],
     this.metadata = const {},
     this.isValid = true,
+    this.activityReplaced,
   });
 
   bool get isSynced => metadata['synced'] == true;
@@ -245,6 +247,7 @@ class ActivitySession {
     List<ActivityWaypoint>? waypoints,
     Map<String, dynamic>? metadata,
     bool? isValid,
+    String? activityReplaced,
   }) {
     return ActivitySession(
       id: id ?? this.id,
@@ -255,6 +258,7 @@ class ActivitySession {
       waypoints: waypoints ?? this.waypoints,
       metadata: metadata ?? this.metadata,
       isValid: isValid ?? this.isValid,
+      activityReplaced: activityReplaced ?? this.activityReplaced,
     );
   }
 
@@ -275,6 +279,7 @@ class ActivitySession {
       'totalSteps': stats.totalSteps,
       'elevationGain': stats.elevationGain,
       'isValid': isValid,
+      'activityReplaced': activityReplaced,
       // Store rich waypoints data in the routePoints field for high fidelity
       'routePoints': waypoints.map((wp) => wp.toJson()).toList(),
       'metadata': metadata,
@@ -330,6 +335,7 @@ class ActivitySession {
       waypoints: parsedWaypoints,
       metadata: json['metadata'] ?? {},
       isValid: json['isValid'] ?? true,
+      activityReplaced: json['activityReplaced'],
     );
   }
 }
@@ -341,6 +347,7 @@ class ActivityWaypoint {
   final String type; // 'start', 'pause', 'resume', 'milestone', 'finish'
   final String? note;
   final FitnessStats? statsAtTime;
+  final double? altitude;
 
   const ActivityWaypoint({
     required this.location,
@@ -348,6 +355,7 @@ class ActivityWaypoint {
     required this.type,
     this.note,
     this.statsAtTime,
+    this.altitude,
   });
 
   Map<String, dynamic> toJson() {
@@ -356,6 +364,7 @@ class ActivityWaypoint {
       'timestamp': timestamp.toIso8601String(),
       'type': type,
       'note': note,
+      'altitude': altitude,
       'statsAtTime': statsAtTime != null
           ? {
               'totalDistanceMeters': statsAtTime!.totalDistanceMeters,
@@ -372,6 +381,7 @@ class ActivityWaypoint {
       timestamp: DateTime.parse(json['timestamp']),
       type: json['type'],
       note: json['note'],
+      altitude: json['altitude']?.toDouble(),
       statsAtTime: json['statsAtTime'] != null
           ? FitnessStats(
               totalDistanceMeters:

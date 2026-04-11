@@ -605,7 +605,14 @@ class _EnhancedRunScreenState extends ConsumerState<EnhancedRunScreen>
       // Haptic feedback for start action
       await HapticFeedback.mediumImpact();
 
-      final success = await actions.startActivity(_selectedActivityType);
+      final goalState = ref.read(goalProvider);
+      final selectedGoal = goalState.selectedGoal;
+      final activityReplaced = selectedGoal?.id;
+
+      final success = await actions.startActivity(
+        _selectedActivityType,
+        activityReplaced: activityReplaced,
+      );
       if (!success) {
         await HapticFeedback.mediumImpact();
         _showErrorSnackBar(

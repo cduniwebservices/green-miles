@@ -110,6 +110,7 @@ class SyncService {
         'total_steps': activity.stats.totalSteps,
         'elevation_gain': activity.stats.elevationGain,
         'is_valid': activity.isValid,
+        'activity_replaced': activity.activityReplaced,
         'start_time': activity.stats.startTime.toIso8601String(),
         'end_time': activity.stats.endTime?.toIso8601String(),
         'route_points': sessionJson['routePoints'], // Use rich data from model

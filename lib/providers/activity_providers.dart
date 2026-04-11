@@ -171,8 +171,8 @@ class ActivityActions {
   Future<bool> initialize() => _controller.initialize();
 
   /// Start a new activity
-  Future<bool> startActivity(ActivityType type) =>
-      _controller.startActivity(type);
+  Future<bool> startActivity(ActivityType type, {String? activityReplaced}) =>
+      _controller.startActivity(type, activityReplaced: activityReplaced);
 
   /// Pause current activity
   Future<bool> pauseActivity() => _controller.pauseActivity();

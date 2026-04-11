@@ -94,7 +94,7 @@ class ActivityController extends ChangeNotifier {
   }
 
   /// Start a new activity session
-  Future<bool> startActivity(ActivityType type) async {
+  Future<bool> startActivity(ActivityType type, {String? activityReplaced}) async {
     if (!canStart) {
       debugPrint(
         '⚠️ ActivityController: Cannot start - invalid state: $_state',
@@ -104,7 +104,7 @@ class ActivityController extends ChangeNotifier {
 
     try {
       debugPrint(
-        '🚀 ActivityController: Starting ${type.displayName} activity...',
+        '🚀 ActivityController: Starting ${type.displayName} activity (Replaced: $activityReplaced)...',
       );
 
       // Ensure GPS is ready with timeout and retries
@@ -148,6 +148,7 @@ class ActivityController extends ChangeNotifier {
         state: _state,
         stats: FitnessStats(startTime: _startTime!),
         isValid: true,
+        activityReplaced: activityReplaced,
       );
 
       // Set initial location
@@ -161,6 +162,7 @@ class ActivityController extends ChangeNotifier {
           timestamp: _startTime!,
           type: 'start',
           note: 'Activity started',
+          altitude: location.altitude,
         ),
       );
 
@@ -216,6 +218,7 @@ class ActivityController extends ChangeNotifier {
             type: 'pause',
             note: 'Activity paused',
             statsAtTime: _stats,
+            altitude: _lastAltitude,
           ),
         );
       }
@@ -261,6 +264,7 @@ class ActivityController extends ChangeNotifier {
             timestamp: DateTime.now(),
             type: 'resume',
             note: 'Activity resumed',
+            altitude: _lastAltitude,
           ),
         );
       }
@@ -303,6 +307,7 @@ class ActivityController extends ChangeNotifier {
             type: 'finish',
             note: 'Activity completed',
             statsAtTime: _stats,
+            altitude: _lastAltitude,
           ),
         );
       }
@@ -508,6 +513,7 @@ void _onLocationUpdate(dynamic locationData) {
             timestamp: timestamp,
             type: 'track_point',
             statsAtTime: _stats,
+            altitude: locationData.altitude,
           ),
         );
       }
@@ -529,6 +535,7 @@ void _onLocationUpdate(dynamic locationData) {
           timestamp: timestamp,
           type: 'start_point',
           statsAtTime: _stats,
+          altitude: locationData.altitude,
         ),
       );
     }
