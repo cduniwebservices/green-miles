@@ -733,7 +733,7 @@ class _ActivityDetailScreenState extends ConsumerState<ActivityDetailScreen> {
             children: [
               const Icon(Icons.terrain, size: 14, color: GlobalTheme.primaryNeon),
               Text(
-                '${(displayStats.elevationGain).toStringAsFixed(1)} m',
+                '${stats.elevationGain.toStringAsFixed(1)} m',
                 style: const TextStyle(color: Colors.black, fontSize: 11, fontWeight: FontWeight.bold),
               ),
             ],
