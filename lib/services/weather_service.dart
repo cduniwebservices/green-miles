@@ -117,14 +117,18 @@ class WeatherService {
   }
 
   /// Fetch IP lookup data for the current user
-  Future<IpLookupData?> getIpLookup() async {
+  Future<IpLookupData?> getIpLookup({String? ipAddress}) async {
     if (_apiKey.isEmpty) {
       EnterpriseLogger().logWarning('Weather', 'API Key is missing. IP lookup will not be performed.');
       return null;
     }
 
-    final url = Uri.parse('$_baseUrl/ip.json?key=$_apiKey&q=auto');
-    EnterpriseLogger().logInfo('Weather', 'Performing IP lookup...', metadata: {'url': url.toString().replaceFirst(_apiKey, '***')});
+    final query = ipAddress ?? 'auto:ip';
+    final url = Uri.parse('$_baseUrl/ip.json?key=$_apiKey&q=$query');
+    EnterpriseLogger().logInfo('Weather', 'Performing IP lookup...', metadata: {
+      'url': url.toString().replaceFirst(_apiKey, '***'),
+      'query': query,
+    });
 
     try {
       final response = await http.get(url);
