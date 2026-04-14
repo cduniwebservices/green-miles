@@ -223,16 +223,15 @@ class ActivityWaypointAdapter extends TypeAdapter<ActivityWaypoint> {
       location: fields[0] as LatLng,
       timestamp: DateTime.fromMillisecondsSinceEpoch(fields[1] as int),
       type: fields[2] as String,
-      note: fields[3] as String?,
-      statsAtTime: fields[4] as FitnessStats?,
-      altitude: fields[5] as double?,
+      statsAtTime: fields[3] as FitnessStats?,
+      altitude: fields[4] as double?,
     );
   }
 
   @override
   void write(BinaryWriter writer, ActivityWaypoint obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(5)
       ..writeByte(0)
       ..write(obj.location)
       ..writeByte(1)
@@ -240,10 +239,8 @@ class ActivityWaypointAdapter extends TypeAdapter<ActivityWaypoint> {
       ..writeByte(2)
       ..write(obj.type)
       ..writeByte(3)
-      ..write(obj.note)
-      ..writeByte(4)
       ..write(obj.statsAtTime)
-      ..writeByte(5)
+      ..writeByte(4)
       ..write(obj.altitude);
   }
 

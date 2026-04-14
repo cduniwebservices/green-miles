@@ -418,7 +418,7 @@ class _ActivityDetailScreenState extends ConsumerState<ActivityDetailScreen> {
               _buildSummaryItem(
                 (stats.totalDistanceMeters / 1000).toStringAsFixed(2), 
                 '', 
-                'Distance (km)', 
+                'DISTANCE (KM)', 
                 Icons.route, 
                 GlobalTheme.primaryAccent,
               ),
@@ -519,12 +519,7 @@ class _ActivityDetailScreenState extends ConsumerState<ActivityDetailScreen> {
                   Polyline(
                     points: visiblePoints,
                     strokeWidth: 5.0,
-                    color: theme.primaryColor,
-                  ),
-                  Polyline(
-                    points: visiblePoints,
-                    strokeWidth: 8.0,
-                    color: Colors.black.withOpacity(0.3),
+                    color: Colors.black,
                   ),
                 ],
               ),

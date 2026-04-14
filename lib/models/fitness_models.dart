@@ -147,10 +147,7 @@ class FitnessStats {
   }
 
   String get formattedDistance {
-    if (totalDistanceMeters >= 1000) {
-      return '${(totalDistanceMeters / 1000).toStringAsFixed(2)} km';
-    }
-    return '${totalDistanceMeters.toStringAsFixed(0)} m';
+    return '${(totalDistanceMeters / 1000).toStringAsFixed(2)} km';
   }
 
   String get formattedDuration {
@@ -401,7 +398,7 @@ class IpLookupData {
       continentName: json['continent_name'] as String? ?? '',
       countryCode: json['country_code'] as String? ?? '',
       countryName: json['country_name'] as String? ?? '',
-      isEu: json['is_eu'] as bool? ?? false,
+      isEu: json['is_eu']?.toString().toLowerCase() == 'true',
       geonameId: json['geoname_id'] as int? ?? 0,
       city: json['city'] as String? ?? '',
       region: json['region'] as String? ?? '',
@@ -587,8 +584,7 @@ class ActivitySession {
 class ActivityWaypoint {
   final LatLng location;
   final DateTime timestamp;
-  final String type; // 'start', 'pause', 'resume', 'milestone', 'finish'
-  final String? note;
+  final String type; // 'start', 'pause', 'resume', 'milestone', 'finish', 'track_point'
   final FitnessStats? statsAtTime;
   final double? altitude;
 
@@ -596,7 +592,6 @@ class ActivityWaypoint {
     required this.location,
     required this.timestamp,
     required this.type,
-    this.note,
     this.statsAtTime,
     this.altitude,
   });
@@ -606,7 +601,6 @@ class ActivityWaypoint {
       'location': {'lat': location.latitude, 'lng': location.longitude},
       'timestamp': timestamp.toIso8601String(),
       'type': type,
-      'note': note,
       'altitude': altitude,
       'statsAtTime': statsAtTime != null
           ? {
@@ -631,7 +625,6 @@ class ActivityWaypoint {
       ),
       timestamp: DateTime.parse(json['timestamp'] as String),
       type: json['type'] as String,
-      note: json['note'] as String?,
       altitude: json['altitude']?.toDouble(),
       statsAtTime: statsJson != null
           ? FitnessStats(

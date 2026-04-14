@@ -639,12 +639,7 @@ class _InteractiveMapWidgetState extends ConsumerState<InteractiveMapWidget>
                     Polyline(
                       points: routePoints,
                       strokeWidth: 5.0,
-                      color: widget.routeColor ?? accent,
-                    ),
-                    Polyline(
-                      points: routePoints,
-                      strokeWidth: 8.0,
-                      color: Colors.black.withOpacity(0.3),
+                      color: Colors.black,
                     ),
                   ],
                 ),
@@ -816,7 +811,7 @@ class _InteractiveMapWidgetState extends ConsumerState<InteractiveMapWidget>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 _buildStatCard(stats.formattedDuration, 'TIME', accent),
-                _buildStatCard(stats.formattedDistance, 'DISTANCE', accent),
+                _buildStatCard((stats.totalDistanceMeters / 1000).toStringAsFixed(2), 'DISTANCE (KM)', accent),
                 _buildStatCard('${stats.estimatedCalories}', 'CALORIES', accent),
               ],
             ),

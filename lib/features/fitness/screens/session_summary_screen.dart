@@ -267,7 +267,7 @@ class _SessionSummaryScreenState extends ConsumerState<SessionSummaryScreen>
   Widget _buildMainStats(ThemeData theme, FitnessStats stats) {
     final mainStats = [
       {
-        'label': 'Distance (km)',
+        'label': 'DISTANCE (KM)',
         'value': (stats.totalDistanceMeters / 1000).toStringAsFixed(2),
         'icon': Icons.route_rounded,
         'color': GlobalTheme.primaryAccent,
@@ -566,12 +566,7 @@ class _SessionSummaryScreenState extends ConsumerState<SessionSummaryScreen>
                       Polyline(
                         points: widget.session.routePoints,
                         strokeWidth: 5.0,
-                        color: GlobalTheme.primaryNeon,
-                      ),
-                      Polyline(
-                        points: widget.session.routePoints,
-                        strokeWidth: 8.0,
-                        color: Colors.black.withOpacity(0.3),
+                        color: Colors.black,
                       ),
                     ],
                   ),

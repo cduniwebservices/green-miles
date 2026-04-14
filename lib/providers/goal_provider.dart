@@ -26,7 +26,14 @@ class GoalState {
 }
 
 class GoalNotifier extends StateNotifier<GoalState> {
-  GoalNotifier() : super(GoalState(goals: defaultGoals));
+  GoalNotifier()
+    : super(
+        GoalState(
+          goals: defaultGoals.map((g) => g.copyWith(isSelected: g.id == defaultGoals[0].id)).toList(),
+          selectedGoal: defaultGoals[0],
+          currentIndex: 0,
+        ),
+      );
 
   void selectGoal(Goal goal) {
     final updatedGoals = state.goals
@@ -37,18 +44,29 @@ class GoalNotifier extends StateNotifier<GoalState> {
   }
 
   void setCurrentIndex(int index) {
-    state = state.copyWith(currentIndex: index);
+    if (index >= 0 && index < state.goals.length) {
+      final goal = state.goals[index];
+      final updatedGoals = state.goals
+          .map((g) => g.copyWith(isSelected: g.id == goal.id))
+          .toList();
+      
+      state = state.copyWith(
+        currentIndex: index,
+        goals: updatedGoals,
+        selectedGoal: goal,
+      );
+    }
   }
 
   void nextGoal() {
     if (state.currentIndex < state.goals.length - 1) {
-      state = state.copyWith(currentIndex: state.currentIndex + 1);
+      setCurrentIndex(state.currentIndex + 1);
     }
   }
 
   void previousGoal() {
     if (state.currentIndex > 0) {
-      state = state.copyWith(currentIndex: state.currentIndex - 1);
+      setCurrentIndex(state.currentIndex - 1);
     }
   }
 }

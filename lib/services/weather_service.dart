@@ -143,7 +143,7 @@ class WeatherService {
           continentName: data['continent_name'] as String? ?? '',
           countryCode: data['country_code'] as String? ?? '',
           countryName: data['country_name'] as String? ?? '',
-          isEu: data['is_eu'] as bool? ?? false,
+          isEu: data['is_eu']?.toString().toLowerCase() == 'true',
           geonameId: data['geoname_id'] as int? ?? 0,
           city: data['city'] as String? ?? '',
           region: data['region'] as String? ?? '',

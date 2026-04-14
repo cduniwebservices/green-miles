@@ -168,7 +168,6 @@ class ActivityController extends ChangeNotifier {
           location: _lastKnownLocation!,
           timestamp: _startTime!,
           type: 'start',
-          note: 'Activity started',
           altitude: location.altitude,
         ),
       );
@@ -223,7 +222,6 @@ class ActivityController extends ChangeNotifier {
             location: _lastKnownLocation!,
             timestamp: _pauseTime!,
             type: 'pause',
-            note: 'Activity paused',
             statsAtTime: _stats,
             altitude: _lastAltitude,
           ),
@@ -270,7 +268,6 @@ class ActivityController extends ChangeNotifier {
             location: _lastKnownLocation!,
             timestamp: DateTime.now(),
             type: 'resume',
-            note: 'Activity resumed',
             altitude: _lastAltitude,
           ),
         );
@@ -312,7 +309,6 @@ class ActivityController extends ChangeNotifier {
             location: _lastKnownLocation!,
             timestamp: endTime,
             type: 'finish',
-            note: 'Activity completed',
             statsAtTime: _stats,
             altitude: _lastAltitude,
           ),
