@@ -60,11 +60,6 @@ class _EnhancedRunScreenState extends ConsumerState<EnhancedRunScreen>
   }
 
   Future<void> _initializeActivityController() async {
-        _selectedActivityType = ActivityType.running;
-      } else {
-        _selectedActivityType = ActivityType.walking;
-      }
-    }
     try {
       final actions = ref.read(activityActionsProvider);
       await actions.initialize();
@@ -213,20 +208,20 @@ class _EnhancedRunScreenState extends ConsumerState<EnhancedRunScreen>
 
           const SizedBox(width: 12),
 
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    GestureDetector(
-                      onTap: () => DebugScreenOverlay.show(context),
-                      child: Text(
-                        'Calories Not Carbon',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          color: GlobalTheme.textPrimary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ).animate().fadeIn(delay: 200.ms).slideX(begin: -0.2, end: 0),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                GestureDetector(
+                  onTap: () => DebugScreenOverlay.show(context),
+                  child: Text(
+                    'Calories Not Carbon',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: GlobalTheme.textPrimary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ).animate().fadeIn(delay: 200.ms).slideX(begin: -0.2, end: 0),
 
                 const SizedBox(height: 2),
 
@@ -241,50 +236,22 @@ class _EnhancedRunScreenState extends ConsumerState<EnhancedRunScreen>
           ),
 
           if (state != ActivityState.idle)
-            AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeInOutCubic,
-                  padding: EdgeInsets.symmetric(
-                    horizontal: isCompact ? 10 : 12,
-                    vertical: isCompact ? 4 : 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: statusColor.withOpacity(0.4)),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                            width: 6,
-                            height: 6,
-                            decoration: BoxDecoration(
-                              color: statusColor,
-                              shape: BoxShape.circle,
-                            ),
-                          )
-                          .animate(onPlay: (controller) => controller.repeat())
-                          .fadeIn(duration: 800.ms)
-                          .fadeOut(duration: 800.ms),
-
-                      SizedBox(width: isCompact ? 6 : 8),
-
-                      Text(
-                        _isStopDialogShowing ? 'STOPPED' : state.displayName.toUpperCase(),
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: statusColor,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 0.8,
-                          fontSize: isCompact ? 10 : 11,
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-                .animate()
-                .fadeIn(delay: 300.ms)
-                .slideX(begin: 0.3, end: 0, curve: Curves.elasticOut),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: statusColor.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: statusColor.withOpacity(0.3), width: 1),
+              ),
+              child: Text(
+                _isStopDialogShowing ? 'STOPPED' : state.displayName.toUpperCase(),
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: statusColor,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1.1,
+                ),
+              ),
+            ).animate().fadeIn(delay: 600.ms).scale(curve: Curves.elasticOut),
         ],
       ),
     );
@@ -292,16 +259,16 @@ class _EnhancedRunScreenState extends ConsumerState<EnhancedRunScreen>
 
   Widget _buildTabBar(ThemeData theme) {
     return Container(
-      color: Colors.black87,
+      color: theme.cardColor,
       child: TabBar(
         controller: _tabController,
         indicatorColor: GlobalTheme.primaryNeon,
         indicatorWeight: 3,
         labelColor: GlobalTheme.primaryNeon,
         unselectedLabelColor: Colors.grey,
-        labelStyle: const TextStyle(fontWeight: FontWeight.bold),
+        labelStyle: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.2, fontSize: 12),
         tabs: const [
-          Tab(icon: Icon(Icons.map, size: 24), text: 'Map'),
+          Tab(icon: Icon(Icons.map_outlined, size: 24), text: 'Map'),
           Tab(icon: Icon(Icons.analytics_outlined, size: 24), text: 'Stats'),
         ],
       ),
@@ -363,15 +330,15 @@ class _EnhancedRunScreenState extends ConsumerState<EnhancedRunScreen>
             enableTracking: state.isActive,
             routeColor: theme.primaryColor,
             accentColor: theme.primaryColor,
-              ),
-            ),
+          ),
+        ),
 
-            // Bottom controls
-            Positioned(
-              bottom: 20,
-              left: 20,
-              right: 20,
-              child: ActivityControlsWidget(
+        // Bottom controls
+        Positioned(
+          bottom: 20,
+          left: 20,
+          right: 20,
+          child: ActivityControlsWidget(
             state: state,
             activityType: actions.activityType,
             onPause: () => _handlePauseActivity(actions),
@@ -1284,12 +1251,12 @@ class StatsDisplay extends ConsumerWidget {
               fontWeight: FontWeight.w900,
               color: GlobalTheme.primaryNeon,
               fontSize: 24,
-            ),
-          ),
-        ],
-      ],
-    );
-  }
+                ),
+              ),
+            ],
+          ],
+        );
+      }
 
   String _formatDuration(Duration d) {
     final m = d.inMinutes;
